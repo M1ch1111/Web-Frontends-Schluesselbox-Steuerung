@@ -13,8 +13,8 @@ export class AuthService {
   }
 
   // Dummy Login für das MVP
-  async login(email: string, password: string): Promise<boolean> {
-    if (email === 'admin' && password === 'admin') {
+  async login(username: string, password: string): Promise<boolean> {
+    if (username === 'admin' && password === 'admin') {
       this.is_logged_in = true;
       return true;
     } else {

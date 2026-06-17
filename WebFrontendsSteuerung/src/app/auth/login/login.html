@@ -1,32 +1,59 @@
-<div class="row justify-content-center mt-5">
-  <div class="col-md-6 col-lg-4">
-    <div class="card shadow-sm">
-      <div class="card-body p-4">
-        <h3 class="card-title text-center mb-4">🔑 Schlüsselbox</h3>
+<!-- Hintergrund und vertikale Zentrierung -->
+<div class="min-vh-100 d-flex align-items-center justify-content-center bg-light">
+  <div class="container">
+    <div class="row justify-content-center">
 
-        <!-- Fehlermeldung: Wird nur angezeigt, wenn login_error true ist -->
-        @if (login_error) {
-          <div class="alert alert-danger" role="alert">
-            Falsche E-Mail oder Passwort!
-          </div>
-        }
+      <!-- Box-Breite je nach Gerät anpassen -->
+      <div class="col-12 col-sm-8 col-md-6 col-lg-4">
 
-        <form>
-          <div class="mb-3">
-            <label for="email" class="form-label">E-Mail Adresse</label>
-            <input type="email" class="form-control" id="email" #email placeholder="admin">
+        <!-- Die moderne Karte -->
+        <div class="card border-0 shadow-lg rounded-4">
+          <div class="card-body p-5">
+
+            <!-- Logo / Icon Bereich -->
+            <div class="text-center mb-4">
+              <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center shadow-sm" style="width: 65px; height: 65px;">
+                <!-- Schlüssel-Icon von Bootstrap -->
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" viewBox="0 0 16 16">
+                  <path d="M3.5 11.5a3.5 3.5 0 1 1 3.163-5H14L15.5 8 14 9.5l-1-1-1 1-1-1-1 1-1-1-1 1H6.663a3.5 3.5 0 0 1-3.163 2zM2.5 9a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z"/>
+                </svg>
+              </div>
+              <h3 class="mt-4 font-weight-bold">Schlüsselbox</h3>
+              <p class="text-muted">Bitte melde dich an</p>
+            </div>
+
+            <!-- Fehlermeldung -->
+            @if (login_error) {
+              <div class="alert alert-danger rounded-3 border-0 shadow-sm px-3 py-2" role="alert">
+                <small>Falscher Benutzername oder Passwort!</small>
+              </div>
+            }
+
+            <!-- Durch ngSubmit und type="submit" reagiert das Formular auf die Enter-Taste -->
+            <form>
+
+              <div class="form-floating mb-3">
+                <input type="text" class="form-control rounded-3" id="username" #username placeholder="Benutzername" (keydown.enter)="onSubmit(username.value, password.value)">
+                <label for="username" class="text-muted">Benutzername</label>
+              </div>
+
+              <div class="form-floating mb-4">
+                <input type="password" class="form-control rounded-3" id="password" #password placeholder="Passwort" (keydown.enter)="onSubmit(username.value, password.value)">
+                <label for="password" class="text-muted">Passwort</label>
+              </div>
+
+              <button type="button" class="btn btn-primary btn-lg w-100 rounded-pill shadow-sm mt-2" (click)="onSubmit(username.value, password.value)">
+                Anmelden
+              </button>
+            </form>
+
           </div>
-          <div class="mb-4">
-            <label for="password" class="form-label">Passwort</label>
-            <input type="password" class="form-control" id="password" #password placeholder="admin">
-          </div>
-          <div class="d-grid">
-            <!-- Beim Klick übergeben wir die Werte der Input-Felder an die TypeScript-Funktion -->
-            <button type="button" class="btn btn-primary" (click)="onSubmit(email.value, password.value)">
-              Anmelden
-            </button>
-          </div>
-        </form>
+        </div>
+
+        <!-- Kleiner Footer unter der Box -->
+        <div class="text-center mt-4">
+          <small class="text-muted">Embedded Systems Projekt &copy; 2026</small>
+        </div>
 
       </div>
     </div>

@@ -1,17 +1,17 @@
 import { Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
-// Importiere den AuthService aus deinem shared-Ordner
+import { FormsModule } from '@angular/forms'; // <-- 1. Das hier importieren
 import { AuthService } from '../../shared/auth';
 
 @Component({
   selector: 'app-login',
   templateUrl: './login.html',
-  styleUrls: ['./login.css']
+  styleUrls: ['./login.css'],
+  imports: [FormsModule] // <-- 2. Das Modul hier in der Komponente registrieren!
 })
 export class Login {
   login_error = false;
 
-  // Dependency Injection für Service und Router
   private auth = inject(AuthService);
   private router = inject(Router);
 
