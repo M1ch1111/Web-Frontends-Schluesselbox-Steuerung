@@ -8,8 +8,6 @@
 
     <!-- Linke Spalte: Status -->
     <div class="col-md-6">
-
-      <!-- Tür Status Karte -->
       <div class="card border-0 shadow-sm rounded-4 mb-4">
         <div class="card-body p-4 text-center">
           <h5 class="text-muted mb-3">Türstatus</h5>
@@ -23,24 +21,20 @@
         </div>
       </div>
 
-      <!-- Allgemeine Infos -->
       <div class="card border-0 shadow-sm rounded-4">
         <div class="card-body p-4">
           <h5 class="card-title">Systemstatus</h5>
           <p class="card-text text-primary font-monospace">{{ boxStatus }}</p>
         </div>
       </div>
-
     </div>
 
     <!-- Rechte Spalte: Schlüsselplätze & Aktionen -->
     <div class="col-md-6">
 
-      <!-- Schlüsselplätze -->
       <div class="card border-0 shadow-sm rounded-4 mb-4">
         <div class="card-body p-4">
           <h5 class="card-title mb-4">🔑 Schlüssel Erkennung</h5>
-
           <div class="d-flex justify-content-between">
             @for (platz of schluesselPlaetze; track $index) {
               <div class="text-center">
@@ -50,33 +44,52 @@
                      style="width: 50px; height: 50px; color: white;">
                   {{ $index + 1 }}
                 </div>
-                <!-- NEU: Gibt den Namen aus, wenn nicht leer, ansonsten "Leer" -->
                 <small class="text-muted fw-bold">{{ platz !== 'leer' ? platz : 'Leer' }}</small>
               </div>
             }
           </div>
-
         </div>
       </div>
 
-      <!-- An den ESP32 senden (Wetter & Müll) -->
+      <!-- Daten an LCD senden (Jetzt mit Live-Daten) -->
       <div class="card border-0 shadow-sm rounded-4">
         <div class="card-body p-4">
-          <h5 class="card-title mb-3">📡 Daten an Box senden</h5>
+          <h5 class="card-title mb-3">📡 Daten an LCD senden</h5>
 
-          <div class="mb-3">
-            <label class="form-label text-muted">Wetter Update:</label>
-            <div class="btn-group w-100">
-              <button class="btn btn-outline-primary" (click)="sendeWetter('Sonnig 25°C')">☀️ Sonnig</button>
-              <button class="btn btn-outline-info" (click)="sendeWetter('Regen 15°C')">🌧️ Regen</button>
+          <div class="alert alert-info py-2" style="font-size: 0.85rem;">
+            <strong>LCD-Regeln:</strong> Keine Umlaute (ae, oe, ue) & kein °-Zeichen (C). <br>
+            <em>Texte > 16 Zeichen aktivieren automatisch die Laufschrift!</em>
+          </div>
+
+          <!-- WETTER STEUERUNG -->
+          <div class="mb-4">
+            <label class="form-label text-muted fw-bold">Wetter Update (Soest):</label>
+
+            <!-- NEU: Live Button -->
+            <button class="btn btn-warning w-100 mb-2 shadow-sm text-dark fw-bold" (click)="ladeLiveWetter()">
+              ☁️ Aktuelles Wetter aus dem Internet laden
+            </button>
+
+            <div class="input-group">
+              <input type="text" class="form-control" #wetterInput placeholder="Eigener Text (z.B. Bewoelkt 18C)">
+              <button class="btn btn-primary" (click)="sendeWetter(wetterInput.value); wetterInput.value=''">Senden</button>
             </div>
           </div>
 
+          <hr class="text-muted">
+
+          <!-- MÜLL STEUERUNG -->
           <div>
-            <label class="form-label text-muted">Müllabfuhr Erinnerung:</label>
-            <div class="btn-group w-100">
-              <button class="btn btn-outline-dark" (click)="sendeMuell('Restmüll')">🗑️ Restmüll</button>
-              <button class="btn btn-outline-warning" (click)="sendeMuell('Gelber Sack')">♻️ Gelber Sack</button>
+            <label class="form-label text-muted fw-bold">Müllabfuhr (Merowingerweg):</label>
+
+            <!-- NEU: Kalender Check Button -->
+            <button class="btn btn-success w-100 mb-2 shadow-sm fw-bold" (click)="ermittleLiveMuell()">
+              🗑️ Heutigen Müll berechnen & senden
+            </button>
+
+            <div class="input-group">
+              <input type="text" class="form-control" #muellInput placeholder="Langer Text für Laufschrift...">
+              <button class="btn btn-primary" (click)="sendeMuell(muellInput.value); muellInput.value=''">Senden</button>
             </div>
           </div>
 
