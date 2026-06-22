@@ -1,97 +1,142 @@
-<div class="container mt-5">
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2>🏠 Mein Dashboard</h2>
+<div class="container mt-4 mb-5">
+
+  <!-- KOPFZEILE (Skizze: "Schlüsselbox: verbunden / nicht") -->
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <div class="d-flex align-items-center gap-3">
+      <h2 class="mb-0">🏠 Schlüsselbox</h2>
+
+      <!-- Verbindungsstatus -->
+      <span class="badge rounded-pill {{ isConnected ? 'bg-success' : 'bg-danger' }} fs-6 px-3 py-2">
+        {{ isConnected ? '🟢 Verbunden' : '🔴 Nicht verbunden' }}
+      </span>
+
+      <!-- Kleiner Tür-Status (damit er nicht verloren geht) -->
+      @if (tuerOffen) {
+        <span class="badge bg-danger rounded-pill fs-6 px-3 py-2">🔓 Tür offen</span>
+      } @else {
+        <span class="badge bg-secondary rounded-pill fs-6 px-3 py-2">🔒 Tür zu</span>
+      }
+    </div>
+
     <button class="btn btn-outline-danger rounded-pill px-4" (click)="logout()">Abmelden</button>
   </div>
 
+  <!-- OBERER BEREICH: DIE SCHLÜSSELPLÄTZE (Volle Breite) -->
+  <div class="card border-0 shadow-sm rounded-4 mb-4">
+    <div class="card-body p-4">
+      <div class="d-flex justify-content-between align-items-center px-2">
+        @for (platz of schluesselPlaetze; track $index) {
+          <div class="text-center">
+            <div class="rounded-circle d-flex align-items-center justify-content-center mb-2 mx-auto shadow-sm"
+                 [class.bg-success]="platz !== 'leer'"
+                 [class.bg-light]="platz === 'leer'"
+                 [class.text-white]="platz !== 'leer'"
+                 [class.text-muted]="platz === 'leer'"
+                 [class.border]="platz === 'leer'"
+                 style="width: 70px; height: 70px; font-size: 1.5rem; font-weight: bold;">
+              {{ $index + 1 }}
+            </div>
+            <h5 class="mb-0 fw-bold" [class.text-success]="platz !== 'leer'" [class.text-muted]="platz === 'leer'">
+              {{ platz !== 'leer' ? platz : 'Leer' }}
+            </h5>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- UNTERER BEREICH: GETEILT IN ZWEI SPALTEN -->
   <div class="row g-4">
 
-    <!-- Linke Spalte: Status -->
-    <div class="col-md-6">
-      <div class="card border-0 shadow-sm rounded-4 mb-4">
-        <div class="card-body p-4 text-center">
-          <h5 class="text-muted mb-3">Türstatus</h5>
-          @if (tuerOffen) {
-            <div class="display-1 text-danger mb-2">🔓</div>
-            <h3 class="text-danger">Geöffnet</h3>
-          } @else {
-            <div class="display-1 text-success mb-2">🔒</div>
-            <h3 class="text-success">Geschlossen</h3>
-          }
-        </div>
-      </div>
+    <!-- UNTEN LINKS: MQTT LOG (Skizze: Großer Kasten links) -->
+    <div class="col-md-7 col-lg-8">
+      <div class="card border-0 shadow-sm rounded-4 h-100">
+        <div class="card-body p-4 d-flex flex-column">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="card-title mb-0">📜 MQTT Log</h5>
+            <span class="badge bg-light text-primary font-monospace">{{ boxStatus }}</span>
+          </div>
 
-      <div class="card border-0 shadow-sm rounded-4">
-        <div class="card-body p-4">
-          <h5 class="card-title">Systemstatus</h5>
-          <p class="card-text text-primary font-monospace">{{ boxStatus }}</p>
+          <!-- Scrollbare Liste für die Logs -->
+          <div class="bg-light rounded-3 p-3 flex-grow-1" style="height: 400px; overflow-y: auto;">
+            @if (mqttLogs.length === 0) {
+              <div class="text-muted text-center mt-5">Noch keine Nachrichten empfangen...</div>
+            }
+
+            <ul class="list-group list-group-flush bg-transparent">
+              @for (log of mqttLogs; track $index) {
+                <li class="list-group-item bg-transparent border-bottom px-0 py-2">
+                  <div class="d-flex w-100 justify-content-between">
+                    <small class="text-primary fw-bold">{{ log.topic }}</small>
+                    <small class="text-muted">{{ log.zeit }}</small>
+                  </div>
+                  <p class="mb-0 font-monospace text-dark">{{ log.message }}</p>
+                </li>
+              }
+            </ul>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- Rechte Spalte: Schlüsselplätze & Aktionen -->
-    <div class="col-md-6">
+    <!-- UNTEN RECHTS: DATEN SENDEN (Skizze: 2 Kästen für Wetter & Müll) -->
+    <div class="col-md-5 col-lg-4 d-flex flex-column gap-4">
 
-      <div class="card border-0 shadow-sm rounded-4 mb-4">
+      <!-- KASTEN 1: WETTER -->
+      <div class="card border-0 shadow-sm rounded-4">
         <div class="card-body p-4">
-          <h5 class="card-title mb-4">🔑 Schlüssel Erkennung</h5>
-          <div class="d-flex justify-content-between">
-            @for (platz of schluesselPlaetze; track $index) {
-              <div class="text-center">
-                <div class="rounded-circle d-flex align-items-center justify-content-center mb-2 mx-auto"
-                     [class.bg-success]="platz !== 'leer'"
-                     [class.bg-secondary]="platz === 'leer'"
-                     style="width: 50px; height: 50px; color: white;">
-                  {{ $index + 1 }}
-                </div>
-                <small class="text-muted fw-bold">{{ platz !== 'leer' ? platz : 'Leer' }}</small>
-              </div>
-            }
+          <h5 class="card-title text-info mb-3">☁️ Wetter (Soest)</h5>
+
+          <button class="btn btn-info text-white w-100 mb-3 shadow-sm fw-bold" (click)="ladeLiveWetter()">
+            Live-Daten abrufen & senden
+          </button>
+
+          <div class="input-group">
+            <input type="text" class="form-control" #wetterInput placeholder="Oder eigener Text...">
+            <button class="btn btn-outline-info" (click)="sendeWetter(wetterInput.value); wetterInput.value=''">Senden</button>
           </div>
         </div>
       </div>
 
-      <!-- Daten an LCD senden (Jetzt mit Live-Daten) -->
+      <!-- KASTEN 2: MÜLL -->
       <div class="card border-0 shadow-sm rounded-4">
         <div class="card-body p-4">
-          <h5 class="card-title mb-3">📡 Daten an LCD senden</h5>
+          <h5 class="card-title text-success mb-3">🗑️ Müllabfuhr</h5>
 
-          <div class="alert alert-info py-2" style="font-size: 0.85rem;">
-            <strong>LCD-Regeln:</strong> Keine Umlaute (ae, oe, ue) & kein °-Zeichen (C). <br>
-            <em>Texte > 16 Zeichen aktivieren automatisch die Laufschrift!</em>
+          <button class="btn btn-success w-100 mb-3 shadow-sm fw-bold" (click)="ermittleLiveMuell()">
+            Kalender neu prüfen & senden
+          </button>
+
+          <div class="input-group mb-4">
+            <input type="text" class="form-control" #muellInput placeholder="Oder eigener Text...">
+            <button class="btn btn-outline-success" (click)="sendeMuell(muellInput.value); muellInput.value=''">Senden</button>
           </div>
 
-          <!-- WETTER STEUERUNG -->
-          <div class="mb-4">
-            <label class="form-label text-muted fw-bold">Wetter Update (Soest):</label>
+          <!-- DIE NEUE VORSCHAU FÜR DIE NÄCHSTEN 7 TAGE -->
+          <h6 class="text-muted fw-bold mb-2">Kommende Abholungen (nächste 7 Tage):</h6>
 
-            <!-- NEU: Live Button -->
-            <button class="btn btn-warning w-100 mb-2 shadow-sm text-dark fw-bold" (click)="ladeLiveWetter()">
-              ☁️ Aktuelles Wetter aus dem Internet laden
-            </button>
-
-            <div class="input-group">
-              <input type="text" class="form-control" #wetterInput placeholder="Eigener Text (z.B. Bewoelkt 18C)">
-              <button class="btn btn-primary" (click)="sendeWetter(wetterInput.value); wetterInput.value=''">Senden</button>
+          @if (upcomingMuell.length === 0) {
+            <div class="alert alert-light border text-center py-2 text-muted small mb-0">
+              Keine Termine in den nächsten 7 Tagen.
             </div>
-          </div>
+          } @else {
+            <ul class="list-group list-group-flush border rounded-3 bg-light">
+              @for (muell of upcomingMuell; track $index) {
+                <!-- Zeile grün einfärben, wenn der Müll heute raus muss -->
+                <li class="list-group-item bg-transparent py-2 d-flex justify-content-between align-items-center"
+                    [class.text-success]="muell.istHeute" [class.fw-bold]="muell.istHeute">
+                  <div>
+                    <span class="me-3">{{ muell.datumStr }}</span>
+                    <span>{{ muell.art }}</span>
+                  </div>
 
-          <hr class="text-muted">
-
-          <!-- MÜLL STEUERUNG -->
-          <div>
-            <label class="form-label text-muted fw-bold">Müllabfuhr (Merowingerweg):</label>
-
-            <!-- NEU: Kalender Check Button -->
-            <button class="btn btn-success w-100 mb-2 shadow-sm fw-bold" (click)="ermittleLiveMuell()">
-              🗑️ Heutigen Müll berechnen & senden
-            </button>
-
-            <div class="input-group">
-              <input type="text" class="form-control" #muellInput placeholder="Langer Text für Laufschrift...">
-              <button class="btn btn-primary" (click)="sendeMuell(muellInput.value); muellInput.value=''">Senden</button>
-            </div>
-          </div>
+                  @if (muell.istHeute) {
+                    <span class="badge bg-success rounded-pill">Heute</span>
+                  }
+                </li>
+              }
+            </ul>
+          }
 
         </div>
       </div>

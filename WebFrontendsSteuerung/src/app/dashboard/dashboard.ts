@@ -14,31 +14,48 @@ export class Dashboard implements OnInit {
   private mqtt = inject(MqttService);
   private cdr = inject(ChangeDetectorRef);
 
+  isConnected = false;
   tuerOffen = false;
-  boxStatus = 'Warte auf Daten...';
+  boxStatus = 'Suche nach Schlüsselbox...';
   schluesselPlaetze: string[] = ['leer', 'leer', 'leer', 'leer', 'leer'];
 
+  mqttLogs: { zeit: string, topic: string, message: string }[] = [];
+  upcomingMuell: { datumStr: string, art: string, istHeute: boolean }[] = [];
+
   ngOnInit() {
-    this.mqtt.connect('192.168.178.54');
+    this.mqtt.connect('192.168.178.50');
 
     this.mqtt.messages.subscribe((data) => {
+      this.isConnected = true;
       this.verarbeiteNachricht(data.topic, data.message);
     });
 
     setTimeout(() => {
       this.frageStatusAb();
+      this.ermittleLiveMuell();
+
+      setTimeout(() => {
+        if (!this.isConnected) {
+          this.boxStatus = 'Box ist offline (Kein Strom / Kein WLAN)';
+          this.cdr.detectChanges();
+        }
+      }, 3000);
+
     }, 1500);
   }
 
   frageStatusAb() {
-    console.log('Sende Status-Anfrage an den ESP32...');
     this.mqtt.publish('schluesselbox/anfrage', 'status_bitte');
   }
 
   verarbeiteNachricht(topic: string, message: string) {
-    if (topic === 'schluesselbox/status') {
-      this.boxStatus = message;
-    }
+    const jetzt = new Date();
+    const zeitString = jetzt.toLocaleTimeString('de-DE');
+    this.mqttLogs.unshift({ zeit: zeitString, topic: topic, message: message });
+
+    if (this.mqttLogs.length > 50) this.mqttLogs.pop();
+
+    if (topic === 'schluesselbox/status') this.boxStatus = message;
     else if (topic === 'schluesselbox/tuer') {
       this.tuerOffen = (message.toLowerCase() === 'offen' || message === 'true' || message === '1');
     }
@@ -50,7 +67,6 @@ export class Dashboard implements OnInit {
       const platzNummer = this.extrahierePlatzNummer(topic);
       if (platzNummer >= 0 && platzNummer < 5) this.schluesselPlaetze[platzNummer] = 'leer';
     }
-
     this.cdr.detectChanges();
   }
 
@@ -70,19 +86,14 @@ export class Dashboard implements OnInit {
     this.mqtt.publish('schluesselbox/muell', muellArt);
   }
 
-  // --- NEU: LIVE WETTER FÜR SOEST ---
   async ladeLiveWetter() {
     try {
-      // Koordinaten für Soest (Merowingerweg Umgebung)
       const url = 'https://api.open-meteo.com/v1/forecast?latitude=51.5719&longitude=8.1094&current=temperature_2m,weather_code';
       const response = await fetch(url);
       const data = await response.json();
-
-      // Temperatur runden
       const temp = Math.round(data.current.temperature_2m);
       const code = data.current.weather_code;
 
-      // Wetter-Code (WMO) in saubere LCD-Texte übersetzen
       let wetterText = 'Unbekannt';
       if (code === 0) wetterText = 'Sonnig';
       else if (code === 1 || code === 2 || code === 3) wetterText = 'Bewoelkt';
@@ -91,40 +102,114 @@ export class Dashboard implements OnInit {
       else if (code >= 71 && code <= 77) wetterText = 'Schnee';
       else if (code >= 95) wetterText = 'Gewitter';
 
-      const finalString = `${wetterText} ${temp}C`;
-
-      console.log('Live Wetter für Soest abgerufen:', finalString);
-      this.sendeWetter(finalString);
-
+      this.sendeWetter(`${wetterText} ${temp}C`);
     } catch (error) {
       console.error('Fehler beim Wetter-Abruf', error);
-      alert('Konnte Wetter nicht abrufen.');
     }
   }
 
-  // --- NEU: MÜLLKALENDER FÜR MEROWINGERWEG ---
-  ermittleLiveMuell() {
-    // Das heutige Datum im Format YYYY-MM-DD
-    const heute = new Date().toISOString().split('T')[0];
+  async ermittleLiveMuell() {
+    try {
+      // Dateien im 'public' Ordner von Angular sind direkt über den Root-Pfad '/' erreichbar.
+      const filePath = '/muell_merowingerweg.ics';
 
-    // DEIN KALENDER: Hier trägst du einfach die echten Daten für Soest ein!
-    // Format: 'JAHR-MONAT-TAG': 'LCD Text' (Achte auf Umlaute!)
-    const muellKalender: { [datum: string]: string } = {
-      '2026-06-19': 'Restmuell',
-      '2026-06-25': 'Gelber Sack',
-      '2026-06-26': 'Papiertonne',
-      '2026-07-03': 'Bio-Tonne'
-    };
+      const response = await fetch(filePath);
 
-    // Prüfen, ob für heute ein Müll-Eintrag existiert
-    const heutigerMuell = muellKalender[heute];
+      if (!response.ok) {
+        console.error(`❌ Datei nicht gefunden: ${filePath} (HTTP Status: ${response.status})`);
+        return;
+      }
 
-    if (heutigerMuell) {
-      console.log('Heute wird abgeholt:', heutigerMuell);
+      const text = await response.text();
+
+      // Sicherheitscheck: Verhindert, dass eine Angular 404-HTML-Seite geparst wird.
+      if (!text.includes('BEGIN:VEVENT')) {
+        console.error('❌ Die geladene Datei ist keine gültige ICS-Datei. Inhalt:', text.substring(0, 100));
+        return;
+      }
+
+      console.log(`✅ Kalender erfolgreich geladen von: ${filePath}`);
+      const icsData = text;
+
+      // Zeitrahmen berechnen: Heute 00:00 Uhr bis in 7 Tagen 23:59 Uhr
+      const heute = new Date();
+      heute.setHours(0, 0, 0, 0);
+
+      const in7Tagen = new Date(heute);
+      in7Tagen.setDate(heute.getDate() + 7);
+      in7Tagen.setHours(23, 59, 59, 999);
+
+      const heuteStr = heute.getFullYear().toString() +
+        (heute.getMonth() + 1).toString().padStart(2, '0') +
+        heute.getDate().toString().padStart(2, '0');
+
+      let heutigerMuell = 'Kein Muell';
+      let tempList: { date: Date, datumStr: string, art: string, istHeute: boolean }[] = [];
+
+      const lines = icsData.split(/\r?\n/);
+      let inEvent = false;
+      let eventDate = '';
+      let eventSummary = '';
+
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i].trim();
+
+        if (line === 'BEGIN:VEVENT') {
+          inEvent = true;
+          eventDate = '';
+          eventSummary = '';
+        } else if (line === 'END:VEVENT') {
+          inEvent = false;
+
+          if (eventDate && eventSummary) {
+            const year = parseInt(eventDate.substring(0, 4), 10);
+            const month = parseInt(eventDate.substring(4, 6), 10) - 1;
+            const day = parseInt(eventDate.substring(6, 8), 10);
+            const eDate = new Date(year, month, day);
+
+            if (eDate >= heute && eDate <= in7Tagen) {
+              const isHeute = eventDate === heuteStr || eventDate.startsWith(heuteStr);
+              if (isHeute) {
+                heutigerMuell = eventSummary;
+              }
+
+              const datumFormatiert = `${day.toString().padStart(2, '0')}.${(month + 1).toString().padStart(2, '0')}.${year}`;
+              const existiertSchon = tempList.find(t => t.datumStr === datumFormatiert && t.art === eventSummary);
+
+              if (!existiertSchon) {
+                tempList.push({
+                  date: eDate,
+                  datumStr: datumFormatiert,
+                  art: eventSummary,
+                  istHeute: isHeute
+                });
+              }
+            }
+          }
+        } else if (inEvent) {
+          if (line.startsWith('DTSTART')) {
+            const index = line.indexOf(':');
+            if (index > -1) eventDate = line.substring(index + 1, index + 9);
+          } else if (line.startsWith('SUMMARY')) {
+            const index = line.indexOf(':');
+            if (index > -1) {
+              eventSummary = line.substring(index + 1).trim();
+              eventSummary = eventSummary.replace(/ü/g, 'ue').replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/Ü/g, 'Ue').replace(/Ä/g, 'Ae').replace(/Ö/g, 'Oe');
+            }
+          }
+        }
+      }
+
+      tempList.sort((a, b) => a.date.getTime() - b.date.getTime());
+      this.upcomingMuell = tempList;
+
+      console.log('Müll für HEUTE ermittelt:', heutigerMuell);
       this.sendeMuell(heutigerMuell);
-    } else {
-      console.log('Heute muss kein Müll raus.');
-      this.sendeMuell('Kein Muell');
+
+      this.cdr.detectChanges();
+
+    } catch (error) {
+      console.error('Fehler beim Verarbeiten des Müllkalenders:', error);
     }
   }
 
