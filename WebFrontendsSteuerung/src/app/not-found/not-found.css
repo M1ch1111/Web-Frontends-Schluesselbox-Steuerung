@@ -1,0 +1,30 @@
+.text-gradient {
+  background: linear-gradient(135deg, var(--accent-violet) 0%, var(--accent-cyan) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.error-emoji {
+  font-size: 4.5rem;
+  display: inline-block;
+  animation: search-bounce 3s ease-in-out infinite alternate;
+}
+
+@keyframes search-bounce {
+  0% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-10px) scale(1.05); }
+  100% { transform: translateY(0) scale(1); }
+}
+
+.btn-home-gradient {
+  background: linear-gradient(135deg, var(--accent-violet) 0%, #6366f1 100%);
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 15px rgba(109, 40, 217, 0.15);
+}
+
+.btn-home-gradient:hover {
+  background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(109, 40, 217, 0.25);
+  color: white !important;
+}
