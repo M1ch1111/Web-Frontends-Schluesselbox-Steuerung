@@ -1,4 +1,4 @@
-﻿import { Injectable, NgZone, inject } from '@angular/core';
+import { Injectable, NgZone, inject } from '@angular/core';
 // Wir importieren das ganze Paket einfach als "mqttPkg"
 import * as mqttPkg from 'mqtt';
 import { Subject } from 'rxjs';
@@ -17,6 +17,10 @@ export class MqttService {
   constructor() { }
 
   connect(brokerIp: string) {
+    if (this.client) {
+      this.disconnect();
+    }
+
     const brokerUrl = `ws://${brokerIp}:9001`;
     console.log('Verbinde mit MQTT Broker:', brokerUrl);
 
@@ -46,6 +50,17 @@ export class MqttService {
     this.client.on('error', (error: any) => {
       console.error('MQTT Fehler:', error);
     });
+  }
+
+  disconnect() {
+    if (this.client) {
+      console.log('Verbindung zum MQTT Broker wird getrennt.');
+      try {
+        this.client.end(true);
+      } catch (err) {
+        console.error('Fehler beim Trennen von MQTT:', err);
+      }
+    }
   }
 
   // Funktion zum Senden an den ESP32

@@ -1,32 +1,43 @@
-import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
+import { UpperCasePipe, DatePipe } from '@angular/common';
 import { AuthService } from '../shared/auth';
 import { MqttService } from '../shared/mqtt';
 
 @Component({
   selector: 'app-dashboard',
   templateUrl: './dashboard.html',
-  styleUrls: ['./dashboard.css']
+  styleUrls: ['./dashboard.css'],
+  imports: [UpperCasePipe, DatePipe]
 })
 export class Dashboard implements OnInit {
   private auth = inject(AuthService);
   private router = inject(Router);
   private mqtt = inject(MqttService);
-  private cdr = inject(ChangeDetectorRef);
 
-  isConnected = false;
-  tuerOffen = false;
-  boxStatus = 'Suche nach Schlüsselbox...';
-  schluesselPlaetze: string[] = ['leer', 'leer', 'leer', 'leer', 'leer'];
+  isConnected = signal(false);
+  tuerOffen = signal(false);
+  boxStatus = signal('Suche nach Schlüsselbox...');
+  schluesselPlaetze = signal<string[]>(['leer', 'leer', 'leer', 'leer', 'leer']);
 
-  mqttLogs: { zeit: string, topic: string, message: string }[] = [];
-  upcomingMuell: { datumStr: string, art: string, istHeute: boolean }[] = [];
+  mqttLogs = signal<{ zeit: Date; topic: string; message: string }[]>([]);
+  upcomingMuell = signal<{ datumStr: string; art: string; istHeute: boolean }[]>([]);
+
+  mqttIp = signal('192.168.178.50');
+  settingsOpen = signal(false);
+  wetterInfo = signal('Keine Daten (Bitte laden)');
+  weatherCode = signal<number | null>(null);
 
   ngOnInit() {
-    this.mqtt.connect('192.168.178.50');
+    const savedIp = localStorage.getItem('schluesselbox_mqtt_ip');
+    if (savedIp) {
+      this.mqttIp.set(savedIp);
+    }
+
+    this.mqtt.connect(this.mqttIp());
 
     this.mqtt.messages.subscribe((data) => {
-      this.isConnected = true;
+      this.isConnected.set(true);
       this.verarbeiteNachricht(data.topic, data.message);
     });
 
@@ -35,13 +46,32 @@ export class Dashboard implements OnInit {
       this.ermittleLiveMuell();
 
       setTimeout(() => {
-        if (!this.isConnected) {
-          this.boxStatus = 'Box ist offline (Kein Strom / Kein WLAN)';
-          this.cdr.detectChanges();
+        if (!this.isConnected()) {
+          this.boxStatus.set('Box ist offline (Kein Strom / Kein WLAN)');
         }
       }, 3000);
 
     }, 1500);
+  }
+
+  toggleSettings() {
+    this.settingsOpen.update(open => !open);
+  }
+
+  saveSettings(newIp: string) {
+    const trimmed = newIp.trim();
+    if (trimmed) {
+      this.mqttIp.set(trimmed);
+      localStorage.setItem('schluesselbox_mqtt_ip', this.mqttIp());
+      this.isConnected.set(false);
+      this.boxStatus.set('Verbindung wird neu aufgebaut...');
+      this.mqtt.connect(this.mqttIp());
+
+      setTimeout(() => {
+        this.frageStatusAb();
+      }, 1500);
+    }
+    this.settingsOpen.set(false);
   }
 
   frageStatusAb() {
@@ -50,24 +80,36 @@ export class Dashboard implements OnInit {
 
   verarbeiteNachricht(topic: string, message: string) {
     const jetzt = new Date();
-    const zeitString = jetzt.toLocaleTimeString('de-DE');
-    this.mqttLogs.unshift({ zeit: zeitString, topic: topic, message: message });
 
-    if (this.mqttLogs.length > 50) this.mqttLogs.pop();
+    this.mqttLogs.update(logs => {
+      const newLogs = [{ zeit: jetzt, topic: topic, message: message }, ...logs];
+      if (newLogs.length > 50) newLogs.pop();
+      return newLogs;
+    });
 
-    if (topic === 'schluesselbox/status') this.boxStatus = message;
-    else if (topic === 'schluesselbox/tuer') {
-      this.tuerOffen = (message.toLowerCase() === 'offen' || message === 'true' || message === '1');
-    }
-    else if (topic.includes('erkannt')) {
+    if (topic === 'schluesselbox/status') {
+      this.boxStatus.set(message);
+    } else if (topic === 'schluesselbox/tuer') {
+      this.tuerOffen.set(message.toLowerCase() === 'offen' || message === 'true' || message === '1');
+    } else if (topic.includes('erkannt')) {
       const platzNummer = this.extrahierePlatzNummer(topic);
-      if (platzNummer >= 0 && platzNummer < 5) this.schluesselPlaetze[platzNummer] = message;
-    }
-    else if (topic.includes('entfernt')) {
+      if (platzNummer >= 0 && platzNummer < 5) {
+        this.schluesselPlaetze.update(plaetze => {
+          const copy = [...plaetze];
+          copy[platzNummer] = message;
+          return copy;
+        });
+      }
+    } else if (topic.includes('entfernt')) {
       const platzNummer = this.extrahierePlatzNummer(topic);
-      if (platzNummer >= 0 && platzNummer < 5) this.schluesselPlaetze[platzNummer] = 'leer';
+      if (platzNummer >= 0 && platzNummer < 5) {
+        this.schluesselPlaetze.update(plaetze => {
+          const copy = [...plaetze];
+          copy[platzNummer] = 'leer';
+          return copy;
+        });
+      }
     }
-    this.cdr.detectChanges();
   }
 
   private extrahierePlatzNummer(topic: string): number {
@@ -102,17 +144,18 @@ export class Dashboard implements OnInit {
       else if (code >= 71 && code <= 77) wetterText = 'Schnee';
       else if (code >= 95) wetterText = 'Gewitter';
 
+      this.wetterInfo.set(`${wetterText} ${temp}°C`);
+      this.weatherCode.set(code);
       this.sendeWetter(`${wetterText} ${temp}C`);
     } catch (error) {
       console.error('Fehler beim Wetter-Abruf', error);
+      this.wetterInfo.set('Fehler beim Laden');
     }
   }
 
   async ermittleLiveMuell() {
     try {
-      // Dateien im 'public' Ordner von Angular sind direkt über den Root-Pfad '/' erreichbar.
       const filePath = '/muell_merowingerweg.ics';
-
       const response = await fetch(filePath);
 
       if (!response.ok) {
@@ -122,7 +165,6 @@ export class Dashboard implements OnInit {
 
       const text = await response.text();
 
-      // Sicherheitscheck: Verhindert, dass eine Angular 404-HTML-Seite geparst wird.
       if (!text.includes('BEGIN:VEVENT')) {
         console.error('❌ Die geladene Datei ist keine gültige ICS-Datei. Inhalt:', text.substring(0, 100));
         return;
@@ -131,7 +173,6 @@ export class Dashboard implements OnInit {
       console.log(`✅ Kalender erfolgreich geladen von: ${filePath}`);
       const icsData = text;
 
-      // Zeitrahmen berechnen: Heute 00:00 Uhr bis in 7 Tagen 23:59 Uhr
       const heute = new Date();
       heute.setHours(0, 0, 0, 0);
 
@@ -144,7 +185,7 @@ export class Dashboard implements OnInit {
         heute.getDate().toString().padStart(2, '0');
 
       let heutigerMuell = 'Kein Muell';
-      let tempList: { date: Date, datumStr: string, art: string, istHeute: boolean }[] = [];
+      let tempList: { date: Date; datumStr: string; art: string; istHeute: boolean }[] = [];
 
       const lines = icsData.split(/\r?\n/);
       let inEvent = false;
@@ -201,13 +242,10 @@ export class Dashboard implements OnInit {
       }
 
       tempList.sort((a, b) => a.date.getTime() - b.date.getTime());
-      this.upcomingMuell = tempList;
+      this.upcomingMuell.set(tempList);
 
       console.log('Müll für HEUTE ermittelt:', heutigerMuell);
       this.sendeMuell(heutigerMuell);
-
-      this.cdr.detectChanges();
-
     } catch (error) {
       console.error('Fehler beim Verarbeiten des Müllkalenders:', error);
     }
