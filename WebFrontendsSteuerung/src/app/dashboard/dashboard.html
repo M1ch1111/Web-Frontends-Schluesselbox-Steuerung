@@ -137,7 +137,7 @@
              <h5 class="card-title mb-0 d-flex align-items-center gap-2">
                <span>📜</span> System-Protokoll (MQTT)
              </h5>
-             <span class="badge font-monospace px-3 py-1" style="background: rgba(255, 255, 255, 0.05); color: var(--accent-cyan); border: 1px solid rgba(255, 255, 255, 0.08);">
+             <span class="badge font-monospace px-3 py-1" style="background: rgba(0, 0, 0, 0.04); color: var(--accent-cyan); border: 1px solid rgba(0, 0, 0, 0.08);">
                {{ boxStatus() | uppercase }}
              </span>
              
@@ -161,14 +161,14 @@
  
                <ul class="list-group list-group-flush bg-transparent">
                  @for (log of mqttLogs(); track $index) {
-                   <li class="list-group-item bg-transparent border-bottom px-0 py-2 text-white-50 font-monospace">
+                   <li class="list-group-item bg-transparent border-bottom px-0 py-2 text-secondary font-monospace">
                      <div class="d-flex w-100 justify-content-between">
                        <span class="fw-bold" [style.color]="log.topic.includes('status') ? 'var(--accent-cyan)' : log.topic.includes('tuer') ? 'var(--accent-amber)' : 'var(--accent-emerald)'">
                          {{ log.topic }}
                        </span>
                        <small class="text-muted" style="font-size: 0.75rem;">{{ log.zeit | date:'HH:mm:ss' }}</small>
                      </div>
-                     <div class="text-white mt-1" style="word-break: break-all;">
+                     <div class="mt-1" style="word-break: break-all;">
                        {{ log.message }}
                      </div>
                    </li>
@@ -192,7 +192,7 @@
            </h5>
  
            <!-- Wetter Live Anzeige -->
-           <div class="d-flex align-items-center gap-3 mb-4 p-3 rounded-3" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05);">
+           <div class="d-flex align-items-center gap-3 mb-4 p-3 rounded-3" style="background: rgba(0,0,0,0.02); border: 1px solid rgba(0,0,0,0.05);">
              <div class="weather-icon-container">
                @if (weatherCode() === null) {
                 <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="currentColor" class="text-info" viewBox="0 0 16 16">
@@ -201,7 +201,7 @@
                 </svg>
               } @else if (weatherCode() === 0) {
                 <!-- Sonnig -->
-                <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="#f59e0b" class="bi bi-sun-fill" viewBox="0 0 16 16" style="filter: drop-shadow(0 0 8px rgba(245, 158, 11, 0.5));">
+                <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="#f59e0b" class="bi bi-sun-fill" viewBox="0 0 16 16" style="filter: drop-shadow(0 0 8px rgba(245, 158, 11, 0.3));">
                   <path d="M8 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM8 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 0zm0 13a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 13zm8-5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2a.5.5 0 0 1 .5.5zM3 8a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2A.5.5 0 0 1 3 8zm10.657-5.657a.5.5 0 0 1 0 .707l-1.414 1.415a.5.5 0 1 1-.707-.708l1.414-1.414a.5.5 0 0 1 .707 0zm-9.193 9.193a.5.5 0 0 1 0 .707L3.05 13.657a.5.5 0 0 1-.707-.707l1.414-1.414a.5.5 0 0 1 .707 0zm9.193 2.121a.5.5 0 0 1-.707 0l-1.414-1.414a.5.5 0 0 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .707zM4.464 4.465a.5.5 0 0 1-.707 0L2.343 3.05a.5.5 0 1 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .708z"/>
                 </svg>
               } @else if (weatherCode()! >= 1 && weatherCode()! <= 3) {
@@ -226,7 +226,7 @@
                 </svg>
               } @else if (weatherCode()! >= 95) {
                 <!-- Gewitter -->
-                <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="#a855f7" viewBox="0 0 16 16" style="filter: drop-shadow(0 0 8px rgba(168, 85, 247, 0.4));">
+                <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="#a855f7" viewBox="0 0 16 16" style="filter: drop-shadow(0 0 8px rgba(168, 85, 247, 0.2));">
                   <path d="M11.251 10.457.572 13.64a.5.5 0 0 1-.708-.595l1-3.5a.5.5 0 0 1 .28-.316l2.5-1a.5.5 0 0 1 .632.316l.5 1.5a.5.5 0 0 1-.316.633l-1.5.5 1 2.5a.5.5 0 0 1 .708.595l-1-2.5.5-1.5a.5.5 0 0 1 .632-.316z"/>
                   <path d="M13.405 7.027a5.001 5.001 0 0 0-9.499-1.004A3.5 3.5 0 1 0 3.5 13H13a3 3 0 0 0 .405-5.973z"/>
                 </svg>
@@ -234,7 +234,7 @@
              </div>
              <div>
                <div class="text-muted small">Aktueller Wetterstatus</div>
-               <h5 class="mb-0 fw-bold text-white">{{ wetterInfo() }}</h5>
+               <h5 class="mb-0 fw-bold">{{ wetterInfo() }}</h5>
              </div>
            </div>
  
@@ -248,10 +248,8 @@
            </div>
          </div>
        </section>
-     </div>
  
-     <!-- MÜLLABFUHR WIDGET -->
-     <div class="col-lg-4 d-flex flex-column gap-4">
+       <!-- MÜLLABFUHR WIDGET -->
        <section class="card glass-card border-0">
          <div class="card-body p-4">
            <h5 class="card-title text-success mb-3 d-flex align-items-center gap-2">
@@ -266,16 +264,16 @@
            <h6 class="text-muted fw-bold mb-2 font-monospace" style="font-size: 0.75rem;">KOMMENDE ABHOLUNGEN:</h6>
  
            @if (upcomingMuell().length === 0) {
-             <div class="alert alert-light border text-center py-2 text-muted small mb-0" style="background: rgba(255,255,255,0.02); border-color: rgba(255,255,255,0.05) !important;">
+             <div class="alert alert-light border text-center py-2 text-muted small mb-0" style="background: rgba(0,0,0,0.01); border-color: rgba(0,0,0,0.05) !important;">
                Keine Termine in den nächsten 7 Tagen.
              </div>
            } @else {
-             <ul class="list-group list-group-flush border rounded-3 bg-transparent" style="border-color: rgba(255,255,255,0.08) !important;">
+             <ul class="list-group list-group-flush border rounded-3 bg-transparent" style="border-color: rgba(0,0,0,0.08) !important;">
                @for (muell of upcomingMuell(); track $index) {
                  <li class="list-group-item bg-transparent py-2.5 d-flex justify-content-between align-items-center"
                      [class.trash-today-warning]="muell.istHeute"
-                     [style.border-bottom]="'1px solid rgba(255,255,255,0.05)'"
-                     [style.color]="muell.istHeute ? '#fecaca' : 'var(--text-main)'">
+                     [style.border-bottom]="'1px solid rgba(0,0,0,0.04)'"
+                     [style.color]="muell.istHeute ? 'var(--accent-rose)' : 'var(--text-main)'">
                    <div class="d-flex align-items-center">
                      <span class="font-monospace me-3" style="font-size: 0.85rem;">{{ muell.datumStr }}</span>
                      <span class="fw-medium">{{ muell.art }}</span>

@@ -1,19 +1,19 @@
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
 
 :root {
-  --bg-main: radial-gradient(circle at top, #16192b 0%, #090a10 100%);
-  --panel-bg: rgba(20, 24, 40, 0.65);
-  --panel-border: rgba(255, 255, 255, 0.08);
-  --panel-glow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+  --bg-main: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  --panel-bg: rgba(255, 255, 255, 0.85);
+  --panel-border: rgba(0, 0, 0, 0.08);
+  --panel-glow: 0 8px 32px 0 rgba(148, 163, 184, 0.12);
   
-  --text-main: #f3f4f6;
-  --text-muted: #9ca3af;
+  --text-main: #1e293b;
+  --text-muted: #64748b;
   
-  --accent-cyan: #06b6d4;
+  --accent-cyan: #0891b2;
   --accent-emerald: #10b981;
   --accent-rose: #ef4444;
-  --accent-violet: #8b5cf6;
-  --accent-amber: #f59e0b;
+  --accent-violet: #6d28d9;
+  --accent-amber: #b45309;
 }
 
 body {
@@ -37,7 +37,7 @@ body {
 }
 
 .glass-card:hover {
-  box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.6), 0 0 15px rgba(139, 92, 246, 0.15);
+  box-shadow: 0 12px 40px 0 rgba(148, 163, 184, 0.2), 0 0 15px rgba(109, 40, 217, 0.05);
 }
 
 /* Heading & Text Styling */
@@ -52,31 +52,31 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Custom Input Field */
 .glass-input {
-  background: rgba(255, 255, 255, 0.05) !important;
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  background: rgba(255, 255, 255, 0.9) !important;
+  border: 1px solid rgba(0, 0, 0, 0.15) !important;
   color: var(--text-main) !important;
   border-radius: 0.75rem;
   transition: all 0.2s ease;
 }
 
 .glass-input:focus {
-  background: rgba(255, 255, 255, 0.08) !important;
+  background: rgba(255, 255, 255, 1) !important;
   border-color: var(--accent-violet) !important;
-  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.25) !important;
+  box-shadow: 0 0 0 3px rgba(109, 40, 217, 0.15) !important;
   color: var(--text-main) !important;
 }
 
 .glass-input::placeholder {
-  color: rgba(255, 255, 255, 0.35) !important;
+  color: rgba(0, 0, 0, 0.35) !important;
 }
 
-/* Floating label updates for dark mode */
+/* Floating label updates */
 .form-floating > .glass-input:focus ~ label,
 .form-floating > .glass-input:not(:placeholder-shown) ~ label {
   color: var(--accent-violet) !important;
 }
 .form-floating > label {
-  color: rgba(255, 255, 255, 0.4);
+  color: rgba(0, 0, 0, 0.45);
 }
 
 /* Custom Scrollbar */
@@ -86,15 +86,15 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.02);
+  background: rgba(0, 0, 0, 0.02);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(0, 0, 0, 0.12);
   border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.3);
+  background: rgba(0, 0, 0, 0.25);
 }
 

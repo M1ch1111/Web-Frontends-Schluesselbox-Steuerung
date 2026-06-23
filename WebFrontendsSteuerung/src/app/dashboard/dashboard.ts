@@ -203,6 +203,13 @@ export class Dashboard implements OnInit {
           inEvent = false;
 
           if (eventDate && eventSummary) {
+            // Bereinigung von Restmüll-Zusätzen (nach Umlaut-Ersetzung)
+            eventSummary = eventSummary
+              .replace(" 14-taeglich", "")
+              .replace(" 4-woechentl.", "")
+              .replace(" 14 mal taeglich", "")
+              .trim();
+
             const year = parseInt(eventDate.substring(0, 4), 10);
             const month = parseInt(eventDate.substring(4, 6), 10) - 1;
             const day = parseInt(eventDate.substring(6, 8), 10);
@@ -214,14 +221,18 @@ export class Dashboard implements OnInit {
                 heutigerMuell = eventSummary;
               }
 
+              const wochentage = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
+              const wochentag = wochentage[eDate.getDay()];
+              const artMitWochentag = `${eventSummary} (${wochentag})`;
+
               const datumFormatiert = `${day.toString().padStart(2, '0')}.${(month + 1).toString().padStart(2, '0')}.${year}`;
-              const existiertSchon = tempList.find(t => t.datumStr === datumFormatiert && t.art === eventSummary);
+              const existiertSchon = tempList.find(t => t.datumStr === datumFormatiert && t.art === artMitWochentag);
 
               if (!existiertSchon) {
                 tempList.push({
                   date: eDate,
                   datumStr: datumFormatiert,
-                  art: eventSummary,
+                  art: artMitWochentag,
                   istHeute: isHeute
                 });
               }
