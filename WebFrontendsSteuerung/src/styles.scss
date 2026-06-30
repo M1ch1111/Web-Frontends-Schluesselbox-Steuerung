@@ -12,7 +12,7 @@
   --accent-cyan: #0891b2;
   --accent-emerald: #10b981;
   --accent-rose: #ef4444;
-  --accent-violet: #6d28d9;
+  --accent-violet: #2563eb;
   --accent-amber: #b45309;
 }
 
@@ -37,7 +37,7 @@ body {
 }
 
 .glass-card:hover {
-  box-shadow: 0 12px 40px 0 rgba(148, 163, 184, 0.2), 0 0 15px rgba(109, 40, 217, 0.05);
+  box-shadow: 0 12px 40px 0 rgba(148, 163, 184, 0.2), 0 0 15px rgba(37, 99, 235, 0.05);
 }
 
 /* Heading & Text Styling */
@@ -62,7 +62,7 @@ h1, h2, h3, h4, h5, h6 {
 .glass-input:focus {
   background: rgba(255, 255, 255, 1) !important;
   border-color: var(--accent-violet) !important;
-  box-shadow: 0 0 0 3px rgba(109, 40, 217, 0.15) !important;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15) !important;
   color: var(--text-main) !important;
 }
 

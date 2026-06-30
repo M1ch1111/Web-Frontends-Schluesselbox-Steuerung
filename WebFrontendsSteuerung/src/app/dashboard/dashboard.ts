@@ -1,19 +1,21 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { Router } from '@angular/router';
-import { UpperCasePipe, DatePipe } from '@angular/common';
+import { UpperCasePipe, DatePipe, KeyValuePipe } from '@angular/common';
 import { AuthService } from '../shared/auth';
 import { MqttService } from '../shared/mqtt';
+import { HomeAssistantService, HaEntity } from '../shared/homeassistant';
 
 @Component({
   selector: 'app-dashboard',
   templateUrl: './dashboard.html',
   styleUrls: ['./dashboard.css'],
-  imports: [UpperCasePipe, DatePipe]
+  imports: [UpperCasePipe, DatePipe, KeyValuePipe]
 })
 export class Dashboard implements OnInit {
   private auth = inject(AuthService);
   private router = inject(Router);
   private mqtt = inject(MqttService);
+  ha = inject(HomeAssistantService);
 
   isConnected = signal(false);
   tuerOffen = signal(false);
@@ -27,6 +29,14 @@ export class Dashboard implements OnInit {
   settingsOpen = signal(false);
   wetterInfo = signal('Keine Daten (Bitte laden)');
   weatherCode = signal<number | null>(null);
+
+  // Home Assistant Signals
+  haEntities = signal<HaEntity[]>([]);
+  haGrouped = computed(() => this.ha.groupByDomain(this.haEntities()));
+  haConnected = signal(false);
+  haLoading = signal(false);
+  haError = signal<string | null>(null);
+  haSettingsOpen = signal(false);
 
   ngOnInit() {
     const savedIp = localStorage.getItem('schluesselbox_mqtt_ip');
@@ -44,6 +54,7 @@ export class Dashboard implements OnInit {
     setTimeout(() => {
       this.frageStatusAb();
       this.ermittleLiveMuell();
+      this.ladeLiveWetter();
 
       setTimeout(() => {
         if (!this.isConnected()) {
@@ -52,6 +63,11 @@ export class Dashboard implements OnInit {
       }, 3000);
 
     }, 1500);
+
+    // Home Assistant: Geräte automatisch laden, wenn konfiguriert
+    if (this.ha.isConfigured()) {
+      this.ladeSmartHomeGeraete();
+    }
   }
 
   toggleSettings() {
@@ -265,5 +281,73 @@ export class Dashboard implements OnInit {
   async logout() {
     await this.auth.logout();
     this.router.navigate(['/login']);
+  }
+
+  // ── Home Assistant Methoden ─────────────────────────
+
+  toggleHaSettings() {
+    this.haSettingsOpen.update(open => !open);
+  }
+
+  saveHaSettings(url: string, token: string) {
+    const trimmedUrl = url.trim();
+    const trimmedToken = token.trim();
+    if (trimmedUrl && trimmedToken) {
+      this.ha.saveConfig(trimmedUrl, trimmedToken);
+      this.haSettingsOpen.set(false);
+      this.ladeSmartHomeGeraete();
+    }
+  }
+
+  async ladeSmartHomeGeraete() {
+    if (!this.ha.isConfigured()) {
+      this.haError.set('Bitte zuerst Home Assistant konfigurieren.');
+      return;
+    }
+
+    this.haLoading.set(true);
+    this.haError.set(null);
+
+    try {
+      const entities = await this.ha.getStates();
+      this.haEntities.set(entities);
+      this.haConnected.set(true);
+      console.log(`✅ ${entities.length} Smart Home Geräte geladen`);
+    } catch (error) {
+      console.error('Fehler beim Laden der Smart Home Geräte:', error);
+      this.haConnected.set(false);
+      this.haError.set(error instanceof Error ? error.message : 'Verbindung fehlgeschlagen');
+    } finally {
+      this.haLoading.set(false);
+    }
+  }
+
+  async toggleGeraet(entity: HaEntity) {
+    try {
+      await this.ha.toggleEntity(entity);
+      // Status nach dem Toggle neu laden
+      await this.ladeSmartHomeGeraete();
+    } catch (error) {
+      console.error('Fehler beim Schalten:', error);
+      this.haError.set(error instanceof Error ? error.message : 'Schaltvorgang fehlgeschlagen');
+    }
+  }
+
+  getEntityName(entity: HaEntity): string {
+    return entity.attributes.friendly_name ?? entity.entity_id;
+  }
+
+  getEntityValue(entity: HaEntity): string {
+    const domain = this.ha.getDomain(entity.entity_id);
+    if (domain === 'sensor') {
+      const unit = entity.attributes.unit_of_measurement ?? '';
+      return `${entity.state} ${unit}`.trim();
+    }
+    return entity.state === 'on' ? 'An' : entity.state === 'off' ? 'Aus' : entity.state;
+  }
+
+  isToggleable(entity: HaEntity): boolean {
+    const domain = this.ha.getDomain(entity.entity_id);
+    return domain === 'light' || domain === 'switch';
   }
 }
