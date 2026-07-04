@@ -256,3 +256,85 @@
 .ha-toggle-btn.active .ha-toggle-knob {
   transform: translateX(20px);
 }
+
+/* ── Aktoren / Sensoren Sektions-Styles ──────────── */
+
+.ha-section-badge {
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  padding: 4px 12px;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+
+.ha-badge-aktor {
+  background: rgba(59, 130, 246, 0.12);
+  color: #2563eb;
+}
+
+.ha-badge-sensor {
+  background: rgba(20, 184, 166, 0.12);
+  color: #0d9488;
+}
+
+/* Aktor-Karten: Blauer Akzent */
+.ha-card-aktor {
+  border-left: 3px solid rgba(59, 130, 246, 0.3) !important;
+}
+
+.ha-card-aktor.ha-device-on {
+  background: rgba(59, 130, 246, 0.06);
+  border-color: rgba(59, 130, 246, 0.4) !important;
+  border-left-color: #3b82f6 !important;
+}
+
+.ha-card-aktor:hover {
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.1);
+}
+
+/* Sensor-Karten: Teal Akzent */
+.ha-card-sensor {
+  border-left: 3px solid rgba(20, 184, 166, 0.3) !important;
+}
+
+.ha-card-sensor:hover {
+  box-shadow: 0 2px 8px rgba(20, 184, 166, 0.1);
+}
+
+/* Sensor-Wert Anzeige */
+.ha-sensor-value {
+  min-width: 60px;
+  padding-left: 8px;
+}
+
+/* Automation Checkbox & Active Style */
+.ha-automation-check {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: transparent;
+  transition: all 0.2s ease;
+  margin-right: -4px;
+}
+
+.ha-automation-check:hover {
+  border-color: #8b5cf6;
+  background: rgba(139, 92, 246, 0.05);
+}
+
+.ha-automation-check.checked {
+  background: #8b5cf6;
+  border-color: #8b5cf6;
+  color: white;
+}
+
+.ha-device-card.ha-automation-active {
+  box-shadow: inset 0 0 0 1px rgba(139, 92, 246, 0.3);
+}

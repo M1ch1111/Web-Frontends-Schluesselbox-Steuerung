@@ -1,21 +1,23 @@
 import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { Router } from '@angular/router';
-import { UpperCasePipe, DatePipe, KeyValuePipe } from '@angular/common';
+import { UpperCasePipe, DatePipe } from '@angular/common';
 import { AuthService } from '../shared/auth';
 import { MqttService } from '../shared/mqtt';
 import { HomeAssistantService, HaEntity } from '../shared/homeassistant';
+import { UserService, UserProfile } from '../shared/user';
 
 @Component({
   selector: 'app-dashboard',
   templateUrl: './dashboard.html',
   styleUrls: ['./dashboard.css'],
-  imports: [UpperCasePipe, DatePipe, KeyValuePipe]
+  imports: [UpperCasePipe, DatePipe]
 })
 export class Dashboard implements OnInit {
-  private auth = inject(AuthService);
+  auth = inject(AuthService);
   private router = inject(Router);
   private mqtt = inject(MqttService);
   ha = inject(HomeAssistantService);
+  userService = inject(UserService);
 
   isConnected = signal(false);
   tuerOffen = signal(false);
@@ -38,10 +40,19 @@ export class Dashboard implements OnInit {
   haError = signal<string | null>(null);
   haSettingsOpen = signal(false);
 
+  // Admin-Panel
+  adminPanelOpen = signal(false);
+  newUserName = signal('');
+  newUserPassword = signal('');
+  newUserIsAdmin = signal(false);
+  userMessage = signal<string | null>(null);
+
   ngOnInit() {
-    const savedIp = localStorage.getItem('schluesselbox_mqtt_ip');
-    if (savedIp) {
-      this.mqttIp.set(savedIp);
+    if (typeof localStorage !== 'undefined') {
+      const savedIp = localStorage.getItem('schluesselbox_mqtt_ip');
+      if (savedIp) {
+        this.mqttIp.set(savedIp);
+      }
     }
 
     this.mqtt.connect(this.mqttIp());
@@ -78,7 +89,9 @@ export class Dashboard implements OnInit {
     const trimmed = newIp.trim();
     if (trimmed) {
       this.mqttIp.set(trimmed);
-      localStorage.setItem('schluesselbox_mqtt_ip', this.mqttIp());
+      if (typeof localStorage !== 'undefined') {
+        localStorage.setItem('schluesselbox_mqtt_ip', this.mqttIp());
+      }
       this.isConnected.set(false);
       this.boxStatus.set('Verbindung wird neu aufgebaut...');
       this.mqtt.connect(this.mqttIp());
@@ -115,6 +128,9 @@ export class Dashboard implements OnInit {
           copy[platzNummer] = message;
           return copy;
         });
+
+        // ── Automatisierung: SmartHome-Geräte einschalten ──
+        this.fuehreAutomatisierungAus(message);
       }
     } else if (topic.includes('entfernt')) {
       const platzNummer = this.extrahierePlatzNummer(topic);
@@ -343,11 +359,128 @@ export class Dashboard implements OnInit {
       const unit = entity.attributes.unit_of_measurement ?? '';
       return `${entity.state} ${unit}`.trim();
     }
+    if (domain === 'climate') {
+      const unit = entity.attributes.unit_of_measurement ?? '°C';
+      return `${entity.state} ${unit}`.trim();
+    }
     return entity.state === 'on' ? 'An' : entity.state === 'off' ? 'Aus' : entity.state;
   }
 
   isToggleable(entity: HaEntity): boolean {
     const domain = this.ha.getDomain(entity.entity_id);
     return domain === 'light' || domain === 'switch';
+  }
+
+  /** Gibt den Gerätetyp zurück: 'aktor' (steuerbar) oder 'sensor' (nur Anzeige) */
+  getEntityType(entity: HaEntity): 'aktor' | 'sensor' {
+    const domain = this.ha.getDomain(entity.entity_id);
+    return (domain === 'light' || domain === 'switch') ? 'aktor' : 'sensor';
+  }
+
+  /** Prüft ob es Aktoren in der Geräteliste gibt */
+  hasAktoren(): boolean {
+    return this.haEntities().some(e => this.getEntityType(e) === 'aktor');
+  }
+
+  /** Prüft ob es Sensoren in der Geräteliste gibt */
+  hasSensoren(): boolean {
+    return this.haEntities().some(e => this.getEntityType(e) === 'sensor');
+  }
+
+  /** Filtert Entitäten nach Typ */
+  getEntitiesByType(type: 'aktor' | 'sensor'): HaEntity[] {
+    return this.haEntities().filter(e => this.getEntityType(e) === type);
+  }
+
+  // ── Automatisierung ─────────────────────────────
+
+  /** Führt die SmartHome-Automatisierung für einen erkannten Nutzer aus */
+  async fuehreAutomatisierungAus(personName: string) {
+    if (!this.ha.isConfigured() || !this.haConnected()) return;
+
+    const user = this.userService.getUserByName(personName);
+    if (!user || user.automationDevices.length === 0) {
+      console.log(`ℹ️ Kein Automatisierungsprofil für "${personName}" gefunden.`);
+      return;
+    }
+
+    console.log(`🏠 Automatisierung für "${personName}" wird ausgeführt...`);
+    let eingeschaltet = 0;
+
+    for (const entityId of user.automationDevices) {
+      // Aktuellen Status prüfen
+      const entity = this.haEntities().find(e => e.entity_id === entityId);
+      if (!entity) continue;
+
+      // Nur einschalten wenn aktuell AUS (additives Verhalten)
+      if (entity.state === 'off') {
+        try {
+          const domain = this.ha.getDomain(entityId);
+          await this.ha.callService(domain, 'turn_on', entityId);
+          eingeschaltet++;
+        } catch (error) {
+          console.error(`❌ Fehler beim Einschalten von ${entityId}:`, error);
+        }
+      }
+    }
+
+    // Status neu laden
+    if (eingeschaltet > 0) {
+      await this.ladeSmartHomeGeraete();
+      console.log(`✅ Automatisierung für "${personName}": ${eingeschaltet} Gerät(e) eingeschaltet`);
+    } else {
+      console.log(`ℹ️ Automatisierung für "${personName}": Alle Geräte waren bereits an.`);
+    }
+  }
+
+  /** Toggelt ein Gerät in der Automatisierungsliste des aktuellen Users */
+  toggleAutomationDevice(entityId: string) {
+    const username = this.auth.getCurrentUsername();
+    if (!username) return;
+    this.userService.toggleAutomationDevice(username, entityId);
+  }
+
+  /** Prüft ob ein Gerät in der Automatisierungsliste des aktuellen Users ist */
+  isInAutomation(entityId: string): boolean {
+    const username = this.auth.getCurrentUsername();
+    if (!username) return false;
+    return this.userService.isDeviceInAutomation(username, entityId);
+  }
+
+  // ── Admin-Panel Methoden ─────────────────────────
+
+  toggleAdminPanel() {
+    this.adminPanelOpen.update(open => !open);
+    this.userMessage.set(null);
+  }
+
+  addNewUser(username: string, password: string, isAdmin: boolean) {
+    if (!username.trim() || !password.trim()) {
+      this.userMessage.set('⚠️ Nutzername und Passwort dürfen nicht leer sein.');
+      return;
+    }
+
+    const success = this.userService.addUser(username.trim(), password.trim(), isAdmin);
+    if (success) {
+      this.userMessage.set(`✅ Nutzer "${username.trim()}" wurde angelegt.`);
+      this.newUserName.set('');
+      this.newUserPassword.set('');
+      this.newUserIsAdmin.set(false);
+    } else {
+      this.userMessage.set(`⚠️ Nutzer "${username.trim()}" existiert bereits.`);
+    }
+  }
+
+  deleteUser(username: string) {
+    // Eigenen Account nicht löschen
+    if (username.toLowerCase() === this.auth.getCurrentUsername().toLowerCase()) {
+      this.userMessage.set('⚠️ Du kannst deinen eigenen Account nicht löschen.');
+      return;
+    }
+
+    const success = this.userService.removeUser(username);
+    if (success) {
+      this.userMessage.set(`✅ Nutzer "${username}" wurde gelöscht.`);
+    }
   }
 }

@@ -1,21 +1,37 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
+import { UserService, UserProfile } from './user';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  private is_logged_in: boolean = false;
+  private userService = inject(UserService);
+
+  /** Der aktuell eingeloggte Nutzer (null = nicht eingeloggt) */
+  currentUser = signal<UserProfile | null>(null);
 
   constructor() { }
 
   isLoggedIn(): boolean {
-    return this.is_logged_in;
+    return this.currentUser() !== null;
   }
 
-  // Dummy Login für das MVP
+  /** Gibt den Nutzernamen des aktuell eingeloggten Users zurück */
+  getCurrentUsername(): string {
+    return this.currentUser()?.username ?? '';
+  }
+
+  /** Prüft ob der aktuelle User Admin-Rechte hat */
+  isAdmin(): boolean {
+    return this.currentUser()?.isAdmin ?? false;
+  }
+
+  /** Login gegen die UserService-Nutzerliste */
   async login(username: string, password: string): Promise<boolean> {
-    if (username === 'admin' && password === 'admin') {
-      this.is_logged_in = true;
+    const user = this.userService.authenticate(username, password);
+
+    if (user) {
+      this.currentUser.set(user);
       return true;
     } else {
       return false;
@@ -23,6 +39,6 @@ export class AuthService {
   }
 
   async logout(): Promise<void> {
-    this.is_logged_in = false;
+    this.currentUser.set(null);
   }
 }

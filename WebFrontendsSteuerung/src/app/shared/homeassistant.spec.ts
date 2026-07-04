@@ -23,12 +23,12 @@ describe('HomeAssistantService', () => {
   });
 
   it('should not be configured initially', () => {
-    expect(service.isConfigured()).toBeFalse();
+    expect(service.isConfigured()).toBe(false);
   });
 
   it('should be configured after saveConfig()', () => {
     service.saveConfig('http://192.168.178.100:8123', 'test-token-abc');
-    expect(service.isConfigured()).toBeTrue();
+    expect(service.isConfigured()).toBe(true);
   });
 
   it('should persist config to localStorage', () => {
@@ -91,12 +91,12 @@ describe('HomeAssistantService', () => {
   });
 
   it('should throw error on getStates() when not configured', async () => {
-    await expectAsync(service.getStates()).toBeRejectedWithError('Home Assistant ist nicht konfiguriert.');
+    await expect(service.getStates()).rejects.toThrowError('Home Assistant ist nicht konfiguriert.');
   });
 
   it('should throw error on callService() when not configured', async () => {
-    await expectAsync(
+    await expect(
       service.callService('light', 'turn_on', 'light.test')
-    ).toBeRejectedWithError('Home Assistant ist nicht konfiguriert.');
+    ).rejects.toThrowError('Home Assistant ist nicht konfiguriert.');
   });
 });

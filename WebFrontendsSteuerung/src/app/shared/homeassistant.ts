@@ -31,8 +31,10 @@ export class HomeAssistantService {
   private accessToken: string = '';
 
   constructor() {
-    this.serverUrl = localStorage.getItem(STORAGE_KEY_URL) ?? '';
-    this.accessToken = localStorage.getItem(STORAGE_KEY_TOKEN) ?? '';
+    if (typeof localStorage !== 'undefined') {
+      this.serverUrl = localStorage.getItem(STORAGE_KEY_URL) ?? '';
+      this.accessToken = localStorage.getItem(STORAGE_KEY_TOKEN) ?? '';
+    }
   }
 
   /** Prüft ob URL und Token konfiguriert sind */
@@ -57,8 +59,10 @@ export class HomeAssistantService {
     this.serverUrl = url.replace(/\/+$/, '');
     this.accessToken = token.trim();
 
-    localStorage.setItem(STORAGE_KEY_URL, this.serverUrl);
-    localStorage.setItem(STORAGE_KEY_TOKEN, this.accessToken);
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem(STORAGE_KEY_URL, this.serverUrl);
+      localStorage.setItem(STORAGE_KEY_TOKEN, this.accessToken);
+    }
   }
 
   /** Erstellt die HTTP-Header für API-Anfragen */
