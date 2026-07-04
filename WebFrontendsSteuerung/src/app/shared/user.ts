@@ -69,8 +69,11 @@ export class UserService {
     return true;
   }
 
-  /** Entfernt einen Nutzer (Admin kann sich nicht selbst löschen) */
+  /** Entfernt einen Nutzer (der feste 'admin' kann nicht gelöscht werden) */
   removeUser(username: string): boolean {
+    if (username.toLowerCase() === 'admin') {
+      return false; // Fester Admin-Nutzer darf nicht gelöscht werden
+    }
     const index = this.users.findIndex(
       u => u.username.toLowerCase() === username.toLowerCase()
     );

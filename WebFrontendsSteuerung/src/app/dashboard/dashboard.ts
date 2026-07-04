@@ -44,7 +44,6 @@ export class Dashboard implements OnInit {
   adminPanelOpen = signal(false);
   newUserName = signal('');
   newUserPassword = signal('');
-  newUserIsAdmin = signal(false);
   userMessage = signal<string | null>(null);
 
   ngOnInit() {
@@ -465,7 +464,6 @@ export class Dashboard implements OnInit {
       this.userMessage.set(`✅ Nutzer "${username.trim()}" wurde angelegt.`);
       this.newUserName.set('');
       this.newUserPassword.set('');
-      this.newUserIsAdmin.set(false);
     } else {
       this.userMessage.set(`⚠️ Nutzer "${username.trim()}" existiert bereits.`);
     }
