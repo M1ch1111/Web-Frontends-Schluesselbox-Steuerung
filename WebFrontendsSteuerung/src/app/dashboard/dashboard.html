@@ -579,6 +579,70 @@
     </div>
   </section>
 
+      <!-- ── HEIZUNG (Climate) ──────────────── -->
+      @if (!haLoading() && hasClimate()) {
+      <section class="card glass-card border-0 mt-4">
+        <div class="card-body p-4">
+          <div class="ha-section-block ha-section-climate mb-0">
+            <div class="d-flex align-items-center gap-2 mb-3">
+              <span class="ha-section-badge" style="background: rgba(249, 115, 22, 0.1); color: #ea580c; padding: 4px 10px; border-radius: 20px; font-weight: 700; font-size: 0.75rem;">🌡️ Heizung</span>
+              <span class="badge rounded-pill"
+                style="background: rgba(249, 115, 22, 0.1); color: #ea580c; font-size: 0.65rem;">
+                {{ getEntitiesByType('climate').length }} Geräte
+              </span>
+              <hr class="flex-grow-1 m-0" style="border-color: rgba(249, 115, 22, 0.15);">
+            </div>
+
+            <div class="row row-cols-1 row-cols-md-2 g-3">
+              @for (entity of getEntitiesByType('climate'); track entity.entity_id) {
+              <div class="col">
+                <div class="ha-device-card d-flex flex-column gap-3 p-3 rounded-4" style="background: rgba(0,0,0,0.02); border: 1px solid rgba(0,0,0,0.05);">
+                  
+                  <div class="d-flex justify-content-between align-items-center">
+                    <div class="d-flex align-items-center gap-3">
+                      <div class="ha-device-icon d-flex align-items-center justify-content-center rounded-circle"
+                        style="width: 42px; height: 42px; min-width: 42px; font-size: 1.2rem; background: rgba(249, 115, 22, 0.1);">
+                        {{ ha.getDomainIcon(ha.getDomain(entity.entity_id)) }}
+                      </div>
+                      <div>
+                        <div class="fw-semibold text-truncate" style="font-size: 0.95rem;">
+                          {{ getEntityName(entity) }}
+                        </div>
+                        <div class="text-muted" style="font-size: 0.75rem;">
+                          Ist-Wert: {{ getClimateCurrentTemp(entity) }} °C
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div class="fw-bold" style="font-size: 1.2rem; color: #ea580c;">
+                      {{ getClimateTargetTemp(entity) }} °C
+                    </div>
+                  </div>
+
+                  <!-- Schieberegler -->
+                  <div class="px-2 mt-2">
+                    <input type="range" class="form-range" 
+                           [min]="getClimateMinTemp(entity)" 
+                           [max]="getClimateMaxTemp(entity)" 
+                           step="0.5"
+                           [value]="getClimateTargetTemp(entity)"
+                           (change)="setTemperature(entity, $event)"
+                           style="accent-color: #ea580c;">
+                    <div class="d-flex justify-content-between text-muted mt-1" style="font-size: 0.65rem;">
+                      <span>{{ getClimateMinTemp(entity) }}°C</span>
+                      <span>{{ getClimateMaxTemp(entity) }}°C</span>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+              }
+            </div>
+          </div>
+        </div>
+      </section>
+      }
+
   <!-- ── SENSOREN (nur Anzeige) ──────────────── -->
   @if (!haLoading() && hasSensoren()) {
   <section class="card glass-card border-0 mt-4">

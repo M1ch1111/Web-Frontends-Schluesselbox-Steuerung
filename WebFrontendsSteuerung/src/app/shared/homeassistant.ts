@@ -150,6 +150,23 @@ export class HomeAssistantService {
     }
   }
 
+  /** Ändert die Temperatur eines Thermostats */
+  async setClimateTemperature(entityId: string, temperature: number): Promise<void> {
+    if (!this.isConfigured()) {
+      throw new Error('Home Assistant ist nicht konfiguriert.');
+    }
+
+    const response = await fetch(`${this.serverUrl}/api/services/climate/set_temperature`, {
+      method: 'POST',
+      headers: this.getHeaders(),
+      body: JSON.stringify({ entity_id: entityId, temperature: temperature })
+    });
+
+    if (!response.ok) {
+      throw new Error(`Temperatur konnte nicht gesetzt werden: ${response.status} ${response.statusText}`);
+    }
+  }
+
   /** Schaltet ein Gerät um (toggle) – bestimmt automatisch die richtige Aktion */
   async toggleEntity(entity: HaEntity): Promise<void> {
     const domain = this.getDomain(entity.entity_id);

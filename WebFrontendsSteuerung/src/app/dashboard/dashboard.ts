@@ -311,17 +311,19 @@ export class Dashboard implements OnInit {
     if (trimmedUrl && trimmedToken) {
       this.ha.saveConfig(trimmedUrl, trimmedToken, trimmedRoom);
       this.haSettingsOpen.set(false);
-      this.ladeSmartHomeGeraete();
+      this.ladeSmartHomeGeraete(true);
     }
   }
 
-  async ladeSmartHomeGeraete() {
+  async ladeSmartHomeGeraete(showLoadingIndicator: boolean = true) {
     if (!this.ha.isConfigured()) {
       this.haError.set('Bitte zuerst Home Assistant konfigurieren.');
       return;
     }
 
-    this.haLoading.set(true);
+    if (showLoadingIndicator) {
+      this.haLoading.set(true);
+    }
     this.haError.set(null);
 
     try {
@@ -334,15 +336,17 @@ export class Dashboard implements OnInit {
       this.haConnected.set(false);
       this.haError.set(error instanceof Error ? error.message : 'Verbindung fehlgeschlagen');
     } finally {
-      this.haLoading.set(false);
+      if (showLoadingIndicator) {
+        this.haLoading.set(false);
+      }
     }
   }
 
   async toggleGeraet(entity: HaEntity) {
     try {
       await this.ha.toggleEntity(entity);
-      // Status nach dem Toggle neu laden
-      await this.ladeSmartHomeGeraete();
+      // Status nach dem Toggle neu laden (ohne Spinner, um Springen zu verhindern)
+      await this.ladeSmartHomeGeraete(false);
     } catch (error) {
       console.error('Fehler beim Schalten:', error);
       this.haError.set(error instanceof Error ? error.message : 'Schaltvorgang fehlgeschlagen');
@@ -371,9 +375,10 @@ export class Dashboard implements OnInit {
     return domain === 'light' || domain === 'switch' || domain === 'input_boolean';
   }
 
-  /** Gibt den Gerätetyp zurück: 'aktor' (steuerbar) oder 'sensor' (nur Anzeige) */
-  getEntityType(entity: HaEntity): 'aktor' | 'sensor' {
+  /** Gibt den Gerätetyp zurück: 'aktor', 'sensor' oder 'climate' */
+  getEntityType(entity: HaEntity): 'aktor' | 'sensor' | 'climate' {
     const domain = this.ha.getDomain(entity.entity_id);
+    if (domain === 'climate') return 'climate';
     return (domain === 'light' || domain === 'switch' || domain === 'input_boolean') ? 'aktor' : 'sensor';
   }
 
@@ -387,9 +392,43 @@ export class Dashboard implements OnInit {
     return this.haEntities().some(e => this.getEntityType(e) === 'sensor');
   }
 
+  /** Prüft ob es Heizungen in der Geräteliste gibt */
+  hasClimate(): boolean {
+    return this.haEntities().some(e => this.getEntityType(e) === 'climate');
+  }
+
   /** Filtert Entitäten nach Typ */
-  getEntitiesByType(type: 'aktor' | 'sensor'): HaEntity[] {
+  getEntitiesByType(type: 'aktor' | 'sensor' | 'climate'): HaEntity[] {
     return this.haEntities().filter(e => this.getEntityType(e) === type);
+  }
+
+  getClimateCurrentTemp(entity: HaEntity): string {
+    return entity.attributes['current_temperature'] != null ? String(entity.attributes['current_temperature']) : '--';
+  }
+
+  getClimateTargetTemp(entity: HaEntity): number {
+    return (entity.attributes['temperature'] as number | undefined) ?? 20;
+  }
+
+  getClimateMinTemp(entity: HaEntity): number {
+    return (entity.attributes['min_temp'] as number | undefined) ?? 15;
+  }
+
+  getClimateMaxTemp(entity: HaEntity): number {
+    return (entity.attributes['max_temp'] as number | undefined) ?? 30;
+  }
+
+  async setTemperature(entity: HaEntity, event: Event) {
+    const input = event.target as HTMLInputElement;
+    const temp = parseFloat(input.value);
+    try {
+      await this.ha.setClimateTemperature(entity.entity_id, temp);
+      // Status nach kurzer Verzögerung neu laden (damit HA Zeit hat, ohne Ladespinner)
+      setTimeout(() => this.ladeSmartHomeGeraete(false), 1000);
+    } catch (error) {
+      console.error('Fehler beim Setzen der Temperatur:', error);
+      this.haError.set(error instanceof Error ? error.message : 'Temperatur konnte nicht geändert werden');
+    }
   }
 
   // ── Automatisierung ─────────────────────────────
@@ -424,9 +463,9 @@ export class Dashboard implements OnInit {
       }
     }
 
-    // Status neu laden
+    // Status neu laden (ohne Ladespinner)
     if (eingeschaltet > 0) {
-      await this.ladeSmartHomeGeraete();
+      await this.ladeSmartHomeGeraete(false);
       console.log(`✅ Automatisierung für "${personName}": ${eingeschaltet} Gerät(e) eingeschaltet`);
     } else {
       console.log(`ℹ️ Automatisierung für "${personName}": Alle Geräte waren bereits an.`);
