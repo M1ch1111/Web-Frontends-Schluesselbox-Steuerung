@@ -15,25 +15,28 @@ export interface HaEntity {
 }
 
 /** Unterstützte Gerätedomains */
-export type HaDomain = 'light' | 'switch' | 'sensor' | 'climate';
+export type HaDomain = 'light' | 'switch' | 'sensor' | 'climate' | 'input_boolean';
 
-const SUPPORTED_DOMAINS: HaDomain[] = ['light', 'switch', 'sensor', 'climate'];
+const SUPPORTED_DOMAINS: HaDomain[] = ['light', 'switch', 'sensor', 'climate', 'input_boolean'];
 
 const STORAGE_KEY_URL = 'ha_server_url';
 const STORAGE_KEY_TOKEN = 'ha_access_token';
+const STORAGE_KEY_ROOM = 'ha_room_filter';
 
 @Injectable({
   providedIn: 'root'
 })
 export class HomeAssistantService {
 
-  private serverUrl: string = '';
-  private accessToken: string = '';
+  private serverUrl: string = 'http://192.168.178.57:8123';
+  private accessToken: string = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiIwZWFiOWMwNjgzODA0MzhmOTZiODFjODU1ZTQ4NDAwZCIsImlhdCI6MTc4MzM0OTc0NCwiZXhwIjoyMDk4NzA5NzQ0fQ.I-X1zOMbb9Zlm1PZg0rqE_gmiB9HFgt0o85KINgaSeI';
+  private roomFilter: string = 'DashboardTest';
 
   constructor() {
     if (typeof localStorage !== 'undefined') {
-      this.serverUrl = localStorage.getItem(STORAGE_KEY_URL) ?? '';
-      this.accessToken = localStorage.getItem(STORAGE_KEY_TOKEN) ?? '';
+      this.serverUrl = localStorage.getItem(STORAGE_KEY_URL) ?? 'http://192.168.178.57:8123';
+      this.accessToken = localStorage.getItem(STORAGE_KEY_TOKEN) ?? 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiIwZWFiOWMwNjgzODA0MzhmOTZiODFjODU1ZTQ4NDAwZCIsImlhdCI6MTc4MzM0OTc0NCwiZXhwIjoyMDk4NzA5NzQ0fQ.I-X1zOMbb9Zlm1PZg0rqE_gmiB9HFgt0o85KINgaSeI';
+      this.roomFilter = localStorage.getItem(STORAGE_KEY_ROOM) ?? 'DashboardTest';
     }
   }
 
@@ -47,6 +50,16 @@ export class HomeAssistantService {
     return this.serverUrl;
   }
 
+  /** Gibt den aktuellen Token zurück */
+  getAccessToken(): string {
+    return this.accessToken;
+  }
+
+  /** Gibt den Raum-Filter zurück */
+  getRoomFilter(): string {
+    return this.roomFilter;
+  }
+
   /** Gibt den aktuellen Token zurück (maskiert) */
   getTokenPreview(): string {
     if (this.accessToken.length <= 8) return '****';
@@ -54,14 +67,16 @@ export class HomeAssistantService {
   }
 
   /** Speichert die HA-Konfiguration in localStorage */
-  saveConfig(url: string, token: string): void {
+  saveConfig(url: string, token: string, room: string = ''): void {
     // URL normalisieren: Trailing slash entfernen
     this.serverUrl = url.replace(/\/+$/, '');
     this.accessToken = token.trim();
+    this.roomFilter = room.trim();
 
     if (typeof localStorage !== 'undefined') {
       localStorage.setItem(STORAGE_KEY_URL, this.serverUrl);
       localStorage.setItem(STORAGE_KEY_TOKEN, this.accessToken);
+      localStorage.setItem(STORAGE_KEY_ROOM, this.roomFilter);
     }
   }
 
@@ -91,7 +106,30 @@ export class HomeAssistantService {
       throw new Error(`HTTP Fehler: ${response.status} ${response.statusText}`);
     }
 
-    const allEntities: HaEntity[] = await response.json();
+    let allEntities: HaEntity[] = await response.json();
+
+    // Nach Raum filtern, falls konfiguriert
+    if (this.roomFilter) {
+      try {
+        const tplResponse = await fetch(`${this.serverUrl}/api/template`, {
+          method: 'POST',
+          headers: this.getHeaders(),
+          body: JSON.stringify({ template: `{{ area_entities('${this.roomFilter}') | tojson }}` })
+        });
+        
+        if (tplResponse.ok) {
+          const areaEntities = await tplResponse.json();
+          if (Array.isArray(areaEntities)) {
+            allEntities = allEntities.filter(e => areaEntities.includes(e.entity_id));
+          }
+        } else {
+          console.warn('Fehler beim Abrufen der Raum-Entitäten:', await tplResponse.text());
+        }
+      } catch (err) {
+        console.error('Konnte Raum-Entitäten nicht abfragen:', err);
+      }
+    }
+
     return this.filterSupportedEntities(allEntities);
   }
 
@@ -116,7 +154,7 @@ export class HomeAssistantService {
   async toggleEntity(entity: HaEntity): Promise<void> {
     const domain = this.getDomain(entity.entity_id);
 
-    if (domain === 'light' || domain === 'switch') {
+    if (domain === 'light' || domain === 'switch' || domain === 'input_boolean') {
       const service = entity.state === 'on' ? 'turn_off' : 'turn_on';
       await this.callService(domain, service, entity.entity_id);
     }
@@ -155,6 +193,7 @@ export class HomeAssistantService {
     switch (domain) {
       case 'light': return '💡';
       case 'switch': return '🔌';
+      case 'input_boolean': return '🔘';
       case 'sensor': return '🌡️';
       case 'climate': return '❄️';
       default: return '📟';
@@ -166,6 +205,7 @@ export class HomeAssistantService {
     switch (domain) {
       case 'light': return 'Lichter';
       case 'switch': return 'Schalter';
+      case 'input_boolean': return 'Virtueller Schalter';
       case 'sensor': return 'Sensoren';
       case 'climate': return 'Klima';
       default: return domain;

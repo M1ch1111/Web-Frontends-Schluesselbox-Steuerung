@@ -304,11 +304,12 @@ export class Dashboard implements OnInit {
     this.haSettingsOpen.update(open => !open);
   }
 
-  saveHaSettings(url: string, token: string) {
+  saveHaSettings(url: string, token: string, room: string) {
     const trimmedUrl = url.trim();
     const trimmedToken = token.trim();
+    const trimmedRoom = room.trim();
     if (trimmedUrl && trimmedToken) {
-      this.ha.saveConfig(trimmedUrl, trimmedToken);
+      this.ha.saveConfig(trimmedUrl, trimmedToken, trimmedRoom);
       this.haSettingsOpen.set(false);
       this.ladeSmartHomeGeraete();
     }
@@ -367,13 +368,13 @@ export class Dashboard implements OnInit {
 
   isToggleable(entity: HaEntity): boolean {
     const domain = this.ha.getDomain(entity.entity_id);
-    return domain === 'light' || domain === 'switch';
+    return domain === 'light' || domain === 'switch' || domain === 'input_boolean';
   }
 
   /** Gibt den Gerätetyp zurück: 'aktor' (steuerbar) oder 'sensor' (nur Anzeige) */
   getEntityType(entity: HaEntity): 'aktor' | 'sensor' {
     const domain = this.ha.getDomain(entity.entity_id);
-    return (domain === 'light' || domain === 'switch') ? 'aktor' : 'sensor';
+    return (domain === 'light' || domain === 'switch' || domain === 'input_boolean') ? 'aktor' : 'sensor';
   }
 
   /** Prüft ob es Aktoren in der Geräteliste gibt */
