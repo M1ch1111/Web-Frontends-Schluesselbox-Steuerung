@@ -325,16 +325,16 @@
 }
 
 .ha-automation-check:hover {
-  border-color: #8b5cf6;
-  background: rgba(139, 92, 246, 0.05);
+  border-color: #10b981;
+  background: rgba(16, 185, 129, 0.05);
 }
 
 .ha-automation-check.checked {
-  background: #8b5cf6;
-  border-color: #8b5cf6;
+  background: #10b981;
+  border-color: #10b981;
   color: white;
 }
 
 .ha-device-card.ha-automation-active {
-  box-shadow: inset 0 0 0 1px rgba(139, 92, 246, 0.3);
+  box-shadow: inset 0 0 0 1px rgba(16, 185, 129, 0.3);
 }
