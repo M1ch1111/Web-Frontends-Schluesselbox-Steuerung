@@ -1,16 +1,20 @@
 import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { Router } from '@angular/router';
 import { UpperCasePipe, DatePipe } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { AuthService } from '../shared/auth';
 import { MqttService } from '../shared/mqtt';
 import { HomeAssistantService, HaEntity } from '../shared/homeassistant';
-import { UserService, UserProfile } from '../shared/user';
+import { UserService } from '../shared/user';
+import { AdminPanel, UserAddedEvent } from '../admin-panel/admin-panel';
+import { MqttTopicPipe } from '../shared/mqtt-topic.pipe';
+import { SlotStatusDirective } from '../shared/slot-status.directive';
 
 @Component({
   selector: 'app-dashboard',
   templateUrl: './dashboard.html',
   styleUrls: ['./dashboard.css'],
-  imports: [UpperCasePipe, DatePipe]
+  imports: [UpperCasePipe, DatePipe, AdminPanel, MqttTopicPipe, SlotStatusDirective, FormsModule]
 })
 export class Dashboard implements OnInit {
   auth = inject(AuthService);
@@ -31,6 +35,8 @@ export class Dashboard implements OnInit {
   settingsOpen = signal(false);
   wetterInfo = signal('Keine Daten (Bitte laden)');
   weatherCode = signal<number | null>(null);
+  wetterEingabe = '';
+  muellEingabe = '';
 
   // Home Assistant Signals
   haEntities = signal<HaEntity[]>([]);
@@ -42,8 +48,6 @@ export class Dashboard implements OnInit {
 
   // Admin-Panel
   adminPanelOpen = signal(false);
-  newUserName = signal('');
-  newUserPassword = signal('');
   userMessage = signal<string | null>(null);
 
   ngOnInit() {
@@ -637,29 +641,20 @@ export class Dashboard implements OnInit {
     this.userMessage.set(null);
   }
 
-  addNewUser(username: string, password: string, isAdmin: boolean) {
-    if (!username.trim() || !password.trim()) {
-      this.userMessage.set('⚠️ Nutzername und Passwort dürfen nicht leer sein.');
-      return;
-    }
-
-    const success = this.userService.addUser(username.trim(), password.trim(), isAdmin);
-    if (success) {
-      this.userMessage.set(`✅ Nutzer "${username.trim()}" wurde angelegt.`);
-      this.newUserName.set('');
-      this.newUserPassword.set('');
-    } else {
-      this.userMessage.set(`⚠️ Nutzer "${username.trim()}" existiert bereits.`);
-    }
+  onUserAdded(event: UserAddedEvent): void {
+    const success = this.userService.addUser(event.username, event.password, event.isAdmin);
+    this.userMessage.set(
+      success
+        ? `✅ Nutzer "${event.username}" wurde angelegt.`
+        : `⚠️ Nutzer "${event.username}" existiert bereits.`
+    );
   }
 
-  deleteUser(username: string) {
-    // Eigenen Account nicht löschen
+  onUserDeleted(username: string): void {
     if (username.toLowerCase() === this.auth.getCurrentUsername().toLowerCase()) {
       this.userMessage.set('⚠️ Du kannst deinen eigenen Account nicht löschen.');
       return;
     }
-
     const success = this.userService.removeUser(username);
     if (success) {
       this.userMessage.set(`✅ Nutzer "${username}" wurde gelöscht.`);

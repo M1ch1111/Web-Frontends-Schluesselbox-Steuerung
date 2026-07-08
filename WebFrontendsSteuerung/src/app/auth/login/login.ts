@@ -1,7 +1,18 @@
 import { Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
+import { ReactiveFormsModule, FormGroup, FormControl, Validators, ValidatorFn, AbstractControl, ValidationErrors } from '@angular/forms';
 import { AuthService } from '../../shared/auth';
+
+export function noWhitespaceValidator(): ValidatorFn {
+  return (control: AbstractControl): ValidationErrors | null => {
+    const value = control.value;
+    if (typeof value !== 'string') {
+      return null;
+    }
+    const hasWhitespace = /\s/.test(value);
+    return hasWhitespace ? { hasWhitespace: true } : null;
+  };
+}
 
 @Component({
   selector: 'app-login',
@@ -15,7 +26,7 @@ export class Login {
   loginForm = new FormGroup({
     username: new FormControl('', {
       nonNullable: true,
-      validators: [Validators.required, Validators.minLength(3)]
+      validators: [Validators.required, Validators.minLength(3), noWhitespaceValidator()]
     }),
     password: new FormControl('', {
       nonNullable: true,

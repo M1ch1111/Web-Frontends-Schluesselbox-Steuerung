@@ -100,74 +100,13 @@
 
   <!-- ADMIN-PANEL: Nutzerverwaltung (nur für Admins sichtbar) -->
   @if (adminPanelOpen() && auth.isAdmin()) {
-  <div class="card glass-card border-0 p-4 mb-4">
-    <h5 class="mb-3 d-flex align-items-center gap-2" style="color: #7c3aed;">
-      <span>👥</span> Nutzerverwaltung
-    </h5>
-
-    <p class="text-muted small mb-3">
-      ⚠️ Der <strong>Nutzername</strong> muss exakt dem Namen entsprechen, der im ESP32 für den RFID-Chip hinterlegt
-      ist.
-    </p>
-
-    <!-- Nutzer-Meldung -->
-    @if (userMessage()) {
-    <div class="alert rounded-3 py-2 px-3 mb-3"
-      style="background: rgba(139, 92, 246, 0.08); border: 1px solid rgba(139, 92, 246, 0.2); color: #6d28d9;">
-      {{ userMessage() }}
-    </div>
-    }
-
-    <!-- Neuen Nutzer anlegen -->
-    <div class="admin-add-user-form rounded-3 p-3 mb-4"
-      style="background: rgba(0,0,0,0.02); border: 1px solid rgba(0,0,0,0.06);">
-      <h6 class="fw-bold mb-3" style="font-size: 0.85rem;">➕ Neuen Nutzer anlegen</h6>
-      <div class="row g-2 align-items-center">
-        <div class="col-12 col-md-5">
-          <input type="text" class="form-control glass-input" #newUsernameInput placeholder="Nutzername (= RFID-Name)">
-        </div>
-        <div class="col-12 col-md-4">
-          <input type="password" class="form-control glass-input" #newPasswordInput placeholder="Passwort">
-        </div>
-        <div class="col-12 col-md-3">
-          <button class="btn btn-ha w-100 rounded-3 fw-bold py-2"
-            (click)="addNewUser(newUsernameInput.value, newPasswordInput.value, false); newUsernameInput.value=''; newPasswordInput.value=''">
-            Anlegen
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Bestehende Nutzer -->
-    <h6 class="fw-bold mb-2" style="font-size: 0.85rem;">📋 Registrierte Nutzer</h6>
-    <div class="list-group">
-      @for (user of userService.getUsers(); track user.username) {
-      <div class="list-group-item d-flex justify-content-between align-items-center bg-transparent py-3"
-        style="border-color: rgba(0,0,0,0.06);">
-        <div class="d-flex align-items-center gap-3">
-          <span class="fw-semibold">{{ user.username }}</span>
-          @if (user.isAdmin) {
-          <span class="badge rounded-pill px-2 py-1"
-            style="background: rgba(139, 92, 246, 0.12); color: #7c3aed; font-size: 0.65rem;">
-            Admin
-          </span>
-          }
-          @if (user.automationDevices.length > 0) {
-          <span class="badge rounded-pill px-2 py-1"
-            style="background: rgba(59, 130, 246, 0.1); color: #3b82f6; font-size: 0.65rem;">
-            {{ user.automationDevices.length }} Geräte
-          </span>
-          }
-        </div>
-        <button class="btn btn-sm btn-outline-danger rounded-pill px-3"
-          [disabled]="user.username.toLowerCase() === auth.getCurrentUsername().toLowerCase()"
-          (click)="deleteUser(user.username)">
-          Löschen
-        </button>
-      </div>
-      }
-    </div>
-  </div>
+  <app-admin-panel
+    [users]="userService.getUsers()"
+    [currentUsername]="auth.getCurrentUsername()"
+    [userMessage]="userMessage()"
+    (userAdded)="onUserAdded($event)"
+    (userDeleted)="onUserDeleted($event)">
+  </app-admin-panel>
   }
 
   <!-- OBERER BEREICH: DIE VISUELLE SCHLÜSSELBOX -->
@@ -182,7 +121,7 @@
 
           @for (platz of schluesselPlaetze(); track $index) {
           <div class="col d-flex justify-content-center">
-            <div class="key-slot" [class.occupied]="platz !== 'leer'">
+            <div class="key-slot" [appSlotStatus]="platz">
 
               <span class="text-muted fw-bold mb-2" style="font-size: 0.75rem;">Slot {{ $index + 1 }}</span>
 
@@ -262,7 +201,7 @@
                   <div class="d-flex w-100 justify-content-between">
                     <span class="fw-bold"
                       [style.color]="log.topic.includes('status') ? 'var(--accent-cyan)' : log.topic.includes('tuer') ? 'var(--accent-amber)' : 'var(--accent-emerald)'">
-                      {{ log.topic }}
+                      {{ log.topic | mqttTopic }}
                     </span>
                     <small class="text-muted" style="font-size: 0.75rem;">{{ log.zeit | date:'HH:mm:ss' }}</small>
                   </div>
@@ -348,9 +287,9 @@
           </button>
 
           <div class="input-group">
-            <input type="text" class="form-control glass-input" #wetterInput placeholder="Eigener Text senden...">
+            <input type="text" class="form-control glass-input" [(ngModel)]="wetterEingabe" placeholder="Eigener Text senden...">
             <button class="btn btn-outline-info"
-              (click)="sendeWetter(wetterInput.value); wetterInput.value=''">Senden</button>
+              (click)="sendeWetter(wetterEingabe); wetterEingabe=''">Senden</button>
           </div>
         </div>
       </section>
@@ -396,9 +335,9 @@
           }
 
           <div class="input-group mt-4">
-            <input type="text" class="form-control glass-input" #muellInput placeholder="Eigener Text senden...">
+            <input type="text" class="form-control glass-input" [(ngModel)]="muellEingabe" placeholder="Eigener Text senden...">
             <button class="btn btn-outline-success"
-              (click)="sendeMuell(muellInput.value); muellInput.value=''">Senden</button>
+              (click)="sendeMuell(muellEingabe); muellEingabe=''">Senden</button>
           </div>
 
         </div>

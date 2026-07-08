@@ -55,6 +55,9 @@
                   @if (loginForm.get('username')?.errors?.['minlength']) {
                   Der Benutzername muss mindestens 3 Zeichen lang sein.
                   }
+                  @if (loginForm.get('username')?.errors?.['hasWhitespace']) {
+                  Der Benutzername darf keine Leerzeichen enthalten.
+                  }
                 </div>
                 }
               </div>
