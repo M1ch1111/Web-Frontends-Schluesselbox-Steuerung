@@ -137,7 +137,7 @@ export class Dashboard implements OnInit, OnDestroy {
     // If no message arrives within 15 seconds, assume offline
     this.timeoutTimer = setTimeout(() => {
       this.isConnected.set(false);
-      this.boxStatus.set('Box ist offline (Kein Strom / Kein WLAN)');
+      this.boxStatus.set('Box ist offline');
     }, 15000);
   }
 
