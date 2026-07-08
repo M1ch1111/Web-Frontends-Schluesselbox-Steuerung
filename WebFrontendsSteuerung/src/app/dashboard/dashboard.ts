@@ -134,11 +134,17 @@ export class Dashboard implements OnInit {
     } else if (topic.includes('entfernt')) {
       const platzNummer = this.extrahierePlatzNummer(topic);
       if (platzNummer >= 0 && platzNummer < 5) {
+        const personName = this.schluesselPlaetze()[platzNummer];
+        
         this.schluesselPlaetze.update(plaetze => {
           const copy = [...plaetze];
           copy[platzNummer] = 'leer';
           return copy;
         });
+
+        if (personName && personName !== 'leer') {
+          this.stoppeAutomatisierung(personName);
+        }
       }
     }
   }
@@ -418,16 +424,71 @@ export class Dashboard implements OnInit {
     return (entity.attributes['max_temp'] as number | undefined) ?? 30;
   }
 
-  async setTemperature(entity: HaEntity, event: Event) {
+  // ── Heizungs-Präferenzen & Basis-Temperatur ──────
+
+  getClimateOwner(entityId: string): string | null {
+    return this.userService.getClimateOwner(entityId);
+  }
+
+  isClimateLockedForMe(entityId: string): boolean {
+    const owner = this.getClimateOwner(entityId);
+    return owner !== null && owner !== this.auth.getCurrentUsername();
+  }
+
+  getBaseTemperature(entityId: string): number {
+    return this.ha.getBaseTemperature(entityId);
+  }
+
+  async setBaseTemperature(entityId: string, event: Event) {
     const input = event.target as HTMLInputElement;
     const temp = parseFloat(input.value);
-    try {
-      await this.ha.setClimateTemperature(entity.entity_id, temp);
-      // Status nach kurzer Verzögerung neu laden (damit HA Zeit hat, ohne Ladespinner)
-      setTimeout(() => this.ladeSmartHomeGeraete(false), 1000);
-    } catch (error) {
-      console.error('Fehler beim Setzen der Temperatur:', error);
-      this.haError.set(error instanceof Error ? error.message : 'Temperatur konnte nicht geändert werden');
+    this.ha.setBaseTemperature(entityId, temp);
+
+    // Prüfen ob gerade jemand eingecheckt ist, der die Heizung besitzt
+    const owner = this.getClimateOwner(entityId);
+    let ownerCheckedIn = false;
+    if (owner && this.schluesselPlaetze().includes(owner)) {
+      ownerCheckedIn = true;
+    }
+
+    if (!ownerCheckedIn) {
+      // Niemand da, der die Heizung besitzt -> Basis-Temp sofort live anwenden
+      try {
+        await this.ha.setClimateTemperature(entityId, temp);
+        setTimeout(() => this.ladeSmartHomeGeraete(false), 1000);
+      } catch (error) {
+        console.error('Fehler beim Setzen der Basis-Temp:', error);
+      }
+    }
+  }
+
+  getClimatePreference(entityId: string): number {
+    const username = this.auth.getCurrentUsername();
+    const pref = this.userService.getClimatePreference(username, entityId);
+    if (pref !== null) return pref;
+    
+    // Fallback: Aktuelle Target-Temp des Geräts
+    const entity = this.haEntities().find(e => e.entity_id === entityId);
+    if (entity) {
+      return this.getClimateTargetTemp(entity);
+    }
+    return 20; // Default
+  }
+
+  async setClimatePreference(entityId: string, event: Event) {
+    const username = this.auth.getCurrentUsername();
+    const input = event.target as HTMLInputElement;
+    const temp = parseFloat(input.value);
+    this.userService.setClimatePreference(username, entityId, temp);
+
+    // Wenn der Nutzer gerade eingecheckt ist, sofort anwenden
+    if (this.schluesselPlaetze().includes(username)) {
+      try {
+        await this.ha.setClimateTemperature(entityId, temp);
+        setTimeout(() => this.ladeSmartHomeGeraete(false), 1000);
+      } catch (error) {
+        console.error('Fehler beim Setzen der Wunsch-Temp:', error);
+      }
     }
   }
 
@@ -451,14 +512,27 @@ export class Dashboard implements OnInit {
       const entity = this.haEntities().find(e => e.entity_id === entityId);
       if (!entity) continue;
 
-      // Nur einschalten wenn aktuell AUS (additives Verhalten)
-      if (entity.state === 'off') {
-        try {
-          const domain = this.ha.getDomain(entityId);
-          await this.ha.callService(domain, 'turn_on', entityId);
-          eingeschaltet++;
-        } catch (error) {
-          console.error(`❌ Fehler beim Einschalten von ${entityId}:`, error);
+      const domain = this.ha.getDomain(entityId);
+
+      if (domain === 'climate') {
+        const prefTemp = this.userService.getClimatePreference(personName, entityId);
+        if (prefTemp !== null) {
+          try {
+            await this.ha.setClimateTemperature(entityId, prefTemp);
+            eingeschaltet++; // Zählt hier als "Aktion ausgeführt"
+          } catch (error) {
+            console.error(`❌ Fehler beim Setzen der Wunschtemperatur für ${entityId}:`, error);
+          }
+        }
+      } else {
+        // Nur einschalten wenn aktuell AUS (additives Verhalten)
+        if (entity.state === 'off') {
+          try {
+            await this.ha.callService(domain, 'turn_on', entityId);
+            eingeschaltet++;
+          } catch (error) {
+            console.error(`❌ Fehler beim Einschalten von ${entityId}:`, error);
+          }
         }
       }
     }
@@ -469,6 +543,76 @@ export class Dashboard implements OnInit {
       console.log(`✅ Automatisierung für "${personName}": ${eingeschaltet} Gerät(e) eingeschaltet`);
     } else {
       console.log(`ℹ️ Automatisierung für "${personName}": Alle Geräte waren bereits an.`);
+    }
+  }
+
+  /** Stoppt die SmartHome-Automatisierung für einen entfernten Nutzer, beachtet dabei andere Nutzer */
+  async stoppeAutomatisierung(personName: string) {
+    if (!this.ha.isConfigured() || !this.haConnected()) return;
+
+    const user = this.userService.getUserByName(personName);
+    if (!user || user.automationDevices.length === 0) {
+      console.log(`ℹ️ Kein Automatisierungsprofil zum Ausschalten für "${personName}" gefunden.`);
+      return;
+    }
+
+    console.log(`🏠 Automatisierung (Ausschalten) für "${personName}" wird ausgeführt...`);
+    let ausgeschaltet = 0;
+
+    // Ermittle alle aktuell eingecheckten Nutzer (wir haben den aktuellen Nutzer ja schon aus dem Array entfernt)
+    const aktuellEingecheckt = this.schluesselPlaetze().filter(name => name !== 'leer' && name !== personName);
+    
+    // Sammle alle Geräte, die von den ANDEREN aktuell eingecheckten Nutzern noch benötigt werden
+    const benoetigteGeraete = new Set<string>();
+    for (const andereName of aktuellEingecheckt) {
+      const andererUser = this.userService.getUserByName(andereName);
+      if (andererUser) {
+        for (const dev of andererUser.automationDevices) {
+          benoetigteGeraete.add(dev);
+        }
+      }
+    }
+
+    for (const entityId of user.automationDevices) {
+      // Wenn ein anderer aktuell eingecheckter Nutzer dieses Gerät noch braucht, überspringen!
+      if (benoetigteGeraete.has(entityId)) {
+        console.log(`ℹ️ Gerät ${entityId} bleibt unangetastet, da es noch von einem anderen Nutzer benötigt wird.`);
+        continue;
+      }
+
+      // Aktuellen Status prüfen
+      const entity = this.haEntities().find(e => e.entity_id === entityId);
+      if (!entity) continue;
+
+      const domain = this.ha.getDomain(entityId);
+
+      if (domain === 'climate') {
+        const baseTemp = this.ha.getBaseTemperature(entityId);
+        try {
+          await this.ha.setClimateTemperature(entityId, baseTemp);
+          ausgeschaltet++; // Zählt hier als "Aktion ausgeführt"
+        } catch (error) {
+          console.error(`❌ Fehler beim Setzen der Basis-Temperatur für ${entityId}:`, error);
+        }
+      } else {
+        // Nur ausschalten wenn aktuell nicht AUS
+        if (entity.state !== 'off') {
+          try {
+            await this.ha.callService(domain, 'turn_off', entityId);
+            ausgeschaltet++;
+          } catch (error) {
+            console.error(`❌ Fehler beim Ausschalten von ${entityId}:`, error);
+          }
+        }
+      }
+    }
+
+    // Status neu laden (ohne Ladespinner)
+    if (ausgeschaltet > 0) {
+      await this.ladeSmartHomeGeraete(false);
+      console.log(`✅ Automatisierung für "${personName}": ${ausgeschaltet} Gerät(e) ausgeschaltet`);
+    } else {
+      console.log(`ℹ️ Automatisierung für "${personName}": Keine Geräte ausgeschaltet (waren bereits aus oder werden noch benötigt).`);
     }
   }
 

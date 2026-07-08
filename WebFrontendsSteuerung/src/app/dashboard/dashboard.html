@@ -596,9 +596,11 @@
             <div class="row row-cols-1 row-cols-md-2 g-3">
               @for (entity of getEntitiesByType('climate'); track entity.entity_id) {
               <div class="col">
-                <div class="ha-device-card d-flex flex-column gap-3 p-3 rounded-4" style="background: rgba(0,0,0,0.02); border: 1px solid rgba(0,0,0,0.05);">
+                <div class="ha-device-card d-flex flex-column p-3 rounded-4" style="background: rgba(0,0,0,0.02); border: 1px solid rgba(0,0,0,0.05);"
+                     [class.ha-automation-active]="isInAutomation(entity.entity_id)">
                   
-                  <div class="d-flex justify-content-between align-items-center">
+                  <!-- Header: Icon, Name, Ist-Wert -->
+                  <div class="d-flex justify-content-between align-items-center mb-2">
                     <div class="d-flex align-items-center gap-3">
                       <div class="ha-device-icon d-flex align-items-center justify-content-center rounded-circle"
                         style="width: 42px; height: 42px; min-width: 42px; font-size: 1.2rem; background: rgba(249, 115, 22, 0.1);">
@@ -609,31 +611,76 @@
                           {{ getEntityName(entity) }}
                         </div>
                         <div class="text-muted" style="font-size: 0.75rem;">
-                          Ist-Wert: {{ getClimateCurrentTemp(entity) }} °C
+                          Aktueller Ist-Wert: {{ getClimateCurrentTemp(entity) }} °C
                         </div>
                       </div>
                     </div>
-                    
-                    <div class="fw-bold" style="font-size: 1.2rem; color: #ea580c;">
-                      {{ getClimateTargetTemp(entity) }} °C
-                    </div>
                   </div>
 
-                  <!-- Schieberegler -->
-                  <div class="px-2 mt-2">
-                    <input type="range" class="form-range" 
-                           [min]="getClimateMinTemp(entity)" 
-                           [max]="getClimateMaxTemp(entity)" 
-                           step="0.5"
-                           [value]="getClimateTargetTemp(entity)"
-                           (change)="setTemperature(entity, $event)"
-                           style="accent-color: #ea580c;">
-                    <div class="d-flex justify-content-between text-muted mt-1" style="font-size: 0.65rem;">
-                      <span>{{ getClimateMinTemp(entity) }}°C</span>
-                      <span>{{ getClimateMaxTemp(entity) }}°C</span>
-                    </div>
-                  </div>
+                  <hr class="my-2" style="border-color: rgba(0,0,0,0.05);">
 
+                  <!-- Admin Ansicht -->
+                  @if (auth.isAdmin()) {
+                    <div class="mt-2">
+                      <label class="form-label text-muted mb-1" style="font-size: 0.8rem; font-weight: 600;">
+                        Basis-Temperatur (Wenn leer):
+                      </label>
+                      <div class="d-flex align-items-center gap-3">
+                        <input type="range" class="form-range flex-grow-1" 
+                               [min]="getClimateMinTemp(entity)" 
+                               [max]="getClimateMaxTemp(entity)" 
+                               step="0.5"
+                               [value]="getBaseTemperature(entity.entity_id)"
+                               (change)="setBaseTemperature(entity.entity_id, $event)"
+                               style="accent-color: #64748b;">
+                        <span class="fw-bold" style="color: #475569; min-width: 50px; text-align: right;">
+                          {{ getBaseTemperature(entity.entity_id) }} °C
+                        </span>
+                      </div>
+                    </div>
+                  } 
+                  <!-- Benutzer Ansicht -->
+                  @else {
+                    <div class="mt-1">
+                      @if (isClimateLockedForMe(entity.entity_id)) {
+                        <div class="alert alert-secondary py-2 mb-0 d-flex align-items-center justify-content-center gap-2" style="font-size: 0.8rem; background: rgba(0,0,0,0.04); border: none;">
+                          <span>🔒</span>
+                          <span>Blockiert (Gesteuert von <strong>{{ getClimateOwner(entity.entity_id) }}</strong>)</span>
+                        </div>
+                      } @else {
+                        <div class="form-check form-switch mb-3 mt-2 d-flex align-items-center gap-2">
+                          <input class="form-check-input mt-0" type="checkbox" role="switch" 
+                                 [id]="'switch_' + entity.entity_id"
+                                 [checked]="isInAutomation(entity.entity_id)"
+                                 (change)="toggleAutomationDevice(entity.entity_id)"
+                                 style="cursor: pointer; width: 2.5em; height: 1.25em;">
+                          <label class="form-check-label text-muted fw-semibold" [for]="'switch_' + entity.entity_id" style="font-size: 0.85rem; cursor: pointer;">
+                            In meine Routine einbauen
+                          </label>
+                        </div>
+
+                        @if (isInAutomation(entity.entity_id)) {
+                          <div class="mt-3 p-3 rounded-3" style="background: rgba(249, 115, 22, 0.05); border: 1px solid rgba(249, 115, 22, 0.1);">
+                            <label class="form-label mb-2 d-block" style="font-size: 0.8rem; font-weight: 600; color: #ea580c;">
+                              Meine Wunschtemperatur:
+                            </label>
+                            <div class="d-flex align-items-center gap-3">
+                              <input type="range" class="form-range flex-grow-1" 
+                                     [min]="getClimateMinTemp(entity)" 
+                                     [max]="getClimateMaxTemp(entity)" 
+                                     step="0.5"
+                                     [value]="getClimatePreference(entity.entity_id)"
+                                     (change)="setClimatePreference(entity.entity_id, $event)"
+                                     style="accent-color: #ea580c;">
+                              <span class="fw-bold" style="color: #ea580c; font-size: 1.1rem; min-width: 60px; text-align: right;">
+                                {{ getClimatePreference(entity.entity_id) }} °C
+                              </span>
+                            </div>
+                          </div>
+                        }
+                      }
+                    </div>
+                  }
                 </div>
               </div>
               }

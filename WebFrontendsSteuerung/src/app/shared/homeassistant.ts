@@ -22,6 +22,7 @@ const SUPPORTED_DOMAINS: HaDomain[] = ['light', 'switch', 'sensor', 'climate', '
 const STORAGE_KEY_URL = 'ha_server_url';
 const STORAGE_KEY_TOKEN = 'ha_access_token';
 const STORAGE_KEY_ROOM = 'ha_room_filter';
+const STORAGE_KEY_CLIMATE_BASE = 'ha_climate_base_temps';
 
 @Injectable({
   providedIn: 'root'
@@ -31,12 +32,21 @@ export class HomeAssistantService {
   private serverUrl: string = 'http://192.168.178.57:8123';
   private accessToken: string = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiIwZWFiOWMwNjgzODA0MzhmOTZiODFjODU1ZTQ4NDAwZCIsImlhdCI6MTc4MzM0OTc0NCwiZXhwIjoyMDk4NzA5NzQ0fQ.I-X1zOMbb9Zlm1PZg0rqE_gmiB9HFgt0o85KINgaSeI';
   private roomFilter: string = 'DashboardTest';
+  private climateBaseTemps: Record<string, number> = {};
 
   constructor() {
     if (typeof localStorage !== 'undefined') {
       this.serverUrl = localStorage.getItem(STORAGE_KEY_URL) ?? 'http://192.168.178.57:8123';
       this.accessToken = localStorage.getItem(STORAGE_KEY_TOKEN) ?? 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiIwZWFiOWMwNjgzODA0MzhmOTZiODFjODU1ZTQ4NDAwZCIsImlhdCI6MTc4MzM0OTc0NCwiZXhwIjoyMDk4NzA5NzQ0fQ.I-X1zOMbb9Zlm1PZg0rqE_gmiB9HFgt0o85KINgaSeI';
       this.roomFilter = localStorage.getItem(STORAGE_KEY_ROOM) ?? 'DashboardTest';
+      const baseTempsStr = localStorage.getItem(STORAGE_KEY_CLIMATE_BASE);
+      if (baseTempsStr) {
+        try {
+          this.climateBaseTemps = JSON.parse(baseTempsStr);
+        } catch (e) {
+          console.error('Fehler beim Parsen der Basis-Temperaturen', e);
+        }
+      }
     }
   }
 
@@ -164,6 +174,21 @@ export class HomeAssistantService {
 
     if (!response.ok) {
       throw new Error(`Temperatur konnte nicht gesetzt werden: ${response.status} ${response.statusText}`);
+    }
+  }
+
+  // ── Basis-Temperaturen ──────────────────────────
+
+  /** Gibt die Basis-Temperatur für ein Thermostat zurück (Standard: 16°C) */
+  getBaseTemperature(entityId: string): number {
+    return this.climateBaseTemps[entityId] ?? 16;
+  }
+
+  /** Setzt die Basis-Temperatur für ein Thermostat */
+  setBaseTemperature(entityId: string, temperature: number): void {
+    this.climateBaseTemps[entityId] = temperature;
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem(STORAGE_KEY_CLIMATE_BASE, JSON.stringify(this.climateBaseTemps));
     }
   }
 

@@ -6,6 +6,7 @@ export interface UserProfile {
   password: string;            // Klartext für MVP (kein Backend)
   isAdmin: boolean;            // Kann andere Nutzer verwalten
   automationDevices: string[]; // entity_ids die bei Ankunft eingeschaltet werden
+  climatePreferences?: Record<string, number>; // Wunschtemperaturen pro Heizkörper
 }
 
 const STORAGE_KEY = 'schluesselbox_users';
@@ -26,7 +27,8 @@ export class UserService {
         username: 'admin',
         password: 'admin',
         isAdmin: true,
-        automationDevices: []
+        automationDevices: [],
+        climatePreferences: {}
       });
       this.saveToStorage();
     }
@@ -63,7 +65,8 @@ export class UserService {
       username: username.trim(),
       password: password,
       isAdmin: isAdmin,
-      automationDevices: []
+      automationDevices: [],
+      climatePreferences: {}
     });
     this.saveToStorage();
     return true;
@@ -120,6 +123,37 @@ export class UserService {
   isDeviceInAutomation(username: string, entityId: string): boolean {
     const user = this.getUserByName(username);
     return user ? user.automationDevices.includes(entityId) : false;
+  }
+
+  // ── Heizungs-Präferenzen ────────────────────────
+
+  /** Prüft, ob jemand anders diese Heizung bereits in der Routine hat */
+  getClimateOwner(entityId: string): string | null {
+    for (const user of this.users) {
+      if (user.automationDevices.includes(entityId)) {
+        return user.username;
+      }
+    }
+    return null;
+  }
+
+  /** Gibt die Wunschtemperatur eines Nutzers für ein Gerät zurück */
+  getClimatePreference(username: string, entityId: string): number | null {
+    const user = this.getUserByName(username);
+    if (!user || !user.climatePreferences) return null;
+    return user.climatePreferences[entityId] ?? null;
+  }
+
+  /** Setzt die Wunschtemperatur eines Nutzers für ein Gerät */
+  setClimatePreference(username: string, entityId: string, temp: number): void {
+    const user = this.getUserByName(username);
+    if (user) {
+      if (!user.climatePreferences) {
+        user.climatePreferences = {};
+      }
+      user.climatePreferences[entityId] = temp;
+      this.saveToStorage();
+    }
   }
 
   // ── Persistenz ──────────────────────────────────
