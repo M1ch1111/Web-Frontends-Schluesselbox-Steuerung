@@ -16,7 +16,7 @@ export class MqttService {
 
   constructor() { }
 
-  connect(brokerIp: string) {
+  connect(brokerIp: string, username?: string, password?: string) {
     if (this.client) {
       this.disconnect();
     }
@@ -27,7 +27,13 @@ export class MqttService {
     // --- DER VITE-TRICK ---
     const mqtt = (mqttPkg as any).default || mqttPkg;
 
-    this.client = mqtt.connect(brokerUrl);
+    const options: any = {};
+    if (username && password) {
+      options.username = username;
+      options.password = password;
+    }
+
+    this.client = mqtt.connect(brokerUrl, options);
     // -----------------------
 
     this.client.on('connect', () => {

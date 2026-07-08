@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal, computed } from '@angular/core';
 import { Router } from '@angular/router';
 import { UpperCasePipe, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -16,27 +16,30 @@ import { SlotStatusDirective } from '../shared/slot-status.directive';
   styleUrls: ['./dashboard.css'],
   imports: [UpperCasePipe, DatePipe, AdminPanel, MqttTopicPipe, SlotStatusDirective, FormsModule]
 })
-export class Dashboard implements OnInit {
+export class Dashboard implements OnInit, OnDestroy {
   auth = inject(AuthService);
   private router = inject(Router);
   private mqtt = inject(MqttService);
   ha = inject(HomeAssistantService);
   userService = inject(UserService);
 
+  private heartbeatInterval: any;
+  private timeoutTimer: any;
+
   isConnected = signal(false);
   tuerOffen = signal(false);
   boxStatus = signal('Suche nach Schlüsselbox...');
-  schluesselPlaetze = signal<string[]>(['leer', 'leer', 'leer', 'leer', 'leer']);
+  schluesselPlaetze = signal<string[]>(['leer', 'leer', 'leer']);
 
   mqttLogs = signal<{ zeit: Date; topic: string; message: string }[]>([]);
   upcomingMuell = signal<{ datumStr: string; art: string; istHeute: boolean }[]>([]);
 
-  mqttIp = signal('192.168.178.50');
+  mqttIp = signal('Rasp5Uni.local');
+  mqttUser = signal('admin');
+  mqttPass = signal('admin');
   settingsOpen = signal(false);
   wetterInfo = signal('Keine Daten (Bitte laden)');
   weatherCode = signal<number | null>(null);
-  wetterEingabe = '';
-  muellEingabe = '';
 
   // Home Assistant Signals
   haEntities = signal<HaEntity[]>([]);
@@ -56,26 +59,29 @@ export class Dashboard implements OnInit {
       if (savedIp) {
         this.mqttIp.set(savedIp);
       }
+      const savedUser = localStorage.getItem('schluesselbox_mqtt_user');
+      if (savedUser) {
+        this.mqttUser.set(savedUser);
+      }
+      const savedPass = localStorage.getItem('schluesselbox_mqtt_pass');
+      if (savedPass) {
+        this.mqttPass.set(savedPass);
+      }
     }
 
-    this.mqtt.connect(this.mqttIp());
+    this.mqtt.connect(this.mqttIp(), this.mqttUser(), this.mqttPass());
 
     this.mqtt.messages.subscribe((data) => {
+      this.resetTimeout();
       this.isConnected.set(true);
       this.verarbeiteNachricht(data.topic, data.message);
     });
 
     setTimeout(() => {
       this.frageStatusAb();
+      this.startHeartbeat();
       this.ermittleLiveMuell();
       this.ladeLiveWetter();
-
-      setTimeout(() => {
-        if (!this.isConnected()) {
-          this.boxStatus.set('Box ist offline (Kein Strom / Kein WLAN)');
-        }
-      }, 3000);
-
     }, 1500);
 
     // Home Assistant: Geräte automatisch laden, wenn konfiguriert
@@ -88,16 +94,20 @@ export class Dashboard implements OnInit {
     this.settingsOpen.update(open => !open);
   }
 
-  saveSettings(newIp: string) {
+  saveSettings(newIp: string, newUser: string, newPass: string) {
     const trimmed = newIp.trim();
     if (trimmed) {
       this.mqttIp.set(trimmed);
+      this.mqttUser.set(newUser.trim());
+      this.mqttPass.set(newPass.trim());
       if (typeof localStorage !== 'undefined') {
         localStorage.setItem('schluesselbox_mqtt_ip', this.mqttIp());
+        localStorage.setItem('schluesselbox_mqtt_user', this.mqttUser());
+        localStorage.setItem('schluesselbox_mqtt_pass', this.mqttPass());
       }
       this.isConnected.set(false);
       this.boxStatus.set('Verbindung wird neu aufgebaut...');
-      this.mqtt.connect(this.mqttIp());
+      this.mqtt.connect(this.mqttIp(), this.mqttUser(), this.mqttPass());
 
       setTimeout(() => {
         this.frageStatusAb();
@@ -108,6 +118,32 @@ export class Dashboard implements OnInit {
 
   frageStatusAb() {
     this.mqtt.publish('schluesselbox/anfrage', 'status_bitte');
+  }
+
+  startHeartbeat() {
+    if (this.heartbeatInterval) clearInterval(this.heartbeatInterval);
+    
+    // Check status every 10 seconds
+    this.heartbeatInterval = setInterval(() => {
+      this.frageStatusAb();
+    }, 10000);
+
+    this.resetTimeout();
+  }
+
+  resetTimeout() {
+    if (this.timeoutTimer) clearTimeout(this.timeoutTimer);
+    
+    // If no message arrives within 15 seconds, assume offline
+    this.timeoutTimer = setTimeout(() => {
+      this.isConnected.set(false);
+      this.boxStatus.set('Box ist offline (Kein Strom / Kein WLAN)');
+    }, 15000);
+  }
+
+  ngOnDestroy() {
+    if (this.heartbeatInterval) clearInterval(this.heartbeatInterval);
+    if (this.timeoutTimer) clearTimeout(this.timeoutTimer);
   }
 
   verarbeiteNachricht(topic: string, message: string) {

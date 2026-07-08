@@ -79,15 +79,31 @@
       <span>⚙️</span> Verbindungseinstellungen
     </h5>
     <div class="row g-3 align-items-center">
-      <div class="col-12 col-md-8">
-        <div class="form-floating">
+      <div class="col-12 col-md-12">
+        <div class="form-floating mb-3">
           <input type="text" class="form-control glass-input" id="brokerIp" #ipInput [value]="mqttIp()"
             placeholder="z. B. 192.168.178.50">
           <label for="brokerIp">MQTT Broker IP-Adresse</label>
         </div>
+        <div class="row g-3">
+          <div class="col-12 col-md-6">
+            <div class="form-floating">
+              <input type="text" class="form-control glass-input" id="brokerUser" #userInput [value]="mqttUser()"
+                placeholder="Benutzername">
+              <label for="brokerUser">MQTT Benutzername (optional)</label>
+            </div>
+          </div>
+          <div class="col-12 col-md-6">
+            <div class="form-floating">
+              <input type="password" class="form-control glass-input" id="brokerPass" #passInput [value]="mqttPass()"
+                placeholder="Passwort">
+              <label for="brokerPass">MQTT Passwort (optional)</label>
+            </div>
+          </div>
+        </div>
       </div>
-      <div class="col-12 col-md-4 d-flex gap-2">
-        <button class="btn btn-cyan btn-lg w-100 rounded-3 py-3 fw-bold" (click)="saveSettings(ipInput.value)">
+      <div class="col-12 mt-4 d-flex gap-2">
+        <button class="btn btn-cyan btn-lg w-100 rounded-3 py-3 fw-bold" (click)="saveSettings(ipInput.value, userInput.value, passInput.value)">
           Speichern
         </button>
         <button class="btn btn-outline-secondary btn-lg rounded-3 py-3 px-4" (click)="toggleSettings()">
@@ -286,11 +302,7 @@
             Live-Daten abrufen & senden
           </button>
 
-          <div class="input-group">
-            <input type="text" class="form-control glass-input" [(ngModel)]="wetterEingabe" placeholder="Eigener Text senden...">
-            <button class="btn btn-outline-info"
-              (click)="sendeWetter(wetterEingabe); wetterEingabe=''">Senden</button>
-          </div>
+
         </div>
       </section>
 
@@ -334,11 +346,7 @@
           </ul>
           }
 
-          <div class="input-group mt-4">
-            <input type="text" class="form-control glass-input" [(ngModel)]="muellEingabe" placeholder="Eigener Text senden...">
-            <button class="btn btn-outline-success"
-              (click)="sendeMuell(muellEingabe); muellEingabe=''">Senden</button>
-          </div>
+
 
         </div>
       </section>
