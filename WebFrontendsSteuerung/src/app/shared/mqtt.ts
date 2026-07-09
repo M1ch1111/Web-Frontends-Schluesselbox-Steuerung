@@ -1,5 +1,4 @@
 import { Injectable, NgZone, inject } from '@angular/core';
-// Wir importieren das ganze Paket einfach als "mqttPkg"
 import * as mqttPkg from 'mqtt';
 import { Subject } from 'rxjs';
 
@@ -10,8 +9,6 @@ export class MqttService {
   private client!: mqttPkg.MqttClient;
 
   public messages: Subject<{ topic: string; message: string }> = new Subject();
-
-  // WICHTIG: Wir holen uns den Angular "Radar" (NgZone)
   private zone = inject(NgZone);
 
   constructor() { }
@@ -23,8 +20,6 @@ export class MqttService {
 
     const brokerUrl = `ws://${brokerIp}:9001`;
     console.log('Verbinde mit MQTT Broker:', brokerUrl);
-
-    // --- DER VITE-TRICK ---
     const mqtt = (mqttPkg as any).default || mqttPkg;
 
     const options: any = {};
@@ -34,7 +29,6 @@ export class MqttService {
     }
 
     this.client = mqtt.connect(brokerUrl, options);
-    // -----------------------
 
     this.client.on('connect', () => {
       console.log('Erfolgreich mit MQTT Broker verbunden!');
@@ -46,8 +40,6 @@ export class MqttService {
     });
 
     this.client.on('message', (topic: string, message: any) => {
-      // WICHTIG: Wir führen das Weiterleiten der Nachricht INNERHALB der Angular Zone aus.
-      // Das zwingt das Dashboard dazu, das HTML sofort neu zu zeichnen!
       this.zone.run(() => {
         this.messages.next({ topic, message: message.toString() });
       });
@@ -68,8 +60,6 @@ export class MqttService {
       }
     }
   }
-
-  // Funktion zum Senden an den ESP32
   publish(topic: string, message: string) {
     if (this.client && this.client.connected) {
       this.client.publish(topic, message);

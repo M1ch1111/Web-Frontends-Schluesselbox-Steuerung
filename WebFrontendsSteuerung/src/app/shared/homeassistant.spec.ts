@@ -5,7 +5,6 @@ describe('HomeAssistantService', () => {
   let service: HomeAssistantService;
 
   beforeEach(() => {
-    // localStorage leeren vor jedem Test
     localStorage.removeItem('ha_server_url');
     localStorage.removeItem('ha_access_token');
 

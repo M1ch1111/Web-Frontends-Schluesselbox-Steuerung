@@ -78,7 +78,6 @@ export class HomeAssistantService {
 
   /** Speichert die HA-Konfiguration in localStorage */
   saveConfig(url: string, token: string, room: string = ''): void {
-    // URL normalisieren: Trailing slash entfernen
     this.serverUrl = url.replace(/\/+$/, '');
     this.accessToken = token.trim();
     this.roomFilter = room.trim();
@@ -117,8 +116,6 @@ export class HomeAssistantService {
     }
 
     let allEntities: HaEntity[] = await response.json();
-
-    // Nach Raum filtern, falls konfiguriert
     if (this.roomFilter) {
       try {
         const tplResponse = await fetch(`${this.serverUrl}/api/template`, {
@@ -176,8 +173,6 @@ export class HomeAssistantService {
       throw new Error(`Temperatur konnte nicht gesetzt werden: ${response.status} ${response.statusText}`);
     }
   }
-
-  // ── Basis-Temperaturen ──────────────────────────
 
   /** Gibt die Basis-Temperatur für ein Thermostat zurück (Standard: 16°C) */
   getBaseTemperature(entityId: string): number {

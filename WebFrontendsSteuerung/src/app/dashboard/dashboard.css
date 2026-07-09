@@ -1,6 +1,4 @@
-/* Dashboard Custom Styles */
 
-/* Connection Indicator Pulsing */
 .pulse-indicator {
   position: relative;
   display: inline-block;
@@ -32,7 +30,6 @@
   100% { transform: scale(2.5); opacity: 0; }
 }
 
-/* Keybox Container Visual (Light Mode & Reduced Shadows) */
 .keybox-cabinet {
   background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
   border: 1px solid rgba(0, 0, 0, 0.08);
@@ -53,20 +50,17 @@
   background: rgba(0, 0, 0, 0.01);
   border: 1px dashed rgba(0, 0, 0, 0.12);
   transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: none; /* No shadow */
-}
+  box-shadow: none; }
 
 .key-slot.occupied {
   background: radial-gradient(circle at center, rgba(16, 185, 129, 0.08) 0%, rgba(0, 0, 0, 0.01) 100%);
   border: 1px solid rgba(16, 185, 129, 0.25);
-  box-shadow: none; /* No shadow */
-}
+  box-shadow: none; }
 
 .key-slot.occupied:hover {
   transform: translateY(-5px);
   border-color: var(--accent-cyan);
-  box-shadow: none; /* No shadow on hover */
-}
+  box-shadow: none; }
 
 .key-hole {
   width: 48px;
@@ -91,8 +85,7 @@
   width: 28px;
   height: 28px;
   color: var(--accent-cyan);
-  filter: none; /* Removed glow effect */
-  animation: key-sway 3s ease-in-out infinite alternate;
+  filter: none;   animation: key-sway 3s ease-in-out infinite alternate;
 }
 
 @keyframes key-sway {
@@ -100,7 +93,6 @@
   100% { transform: rotate(3deg); }
 }
 
-/* Terminal Log View (Light Console) */
 .terminal-container {
   background: #f8fafc !important;
   border: 1px solid rgba(0, 0, 0, 0.12);
@@ -135,7 +127,6 @@
   background: rgba(0, 0, 0, 0.02);
 }
 
-/* Pulsing banner for today's waste */
 .trash-today-warning {
   background: linear-gradient(135deg, rgba(239, 68, 68, 0.08) 0%, rgba(245, 158, 11, 0.08) 100%);
   border: 1px solid rgba(239, 68, 68, 0.25) !important;
@@ -148,7 +139,6 @@
   100% { border-color: rgba(239, 68, 68, 0.4); }
 }
 
-/* Custom Buttons matching gradients */
 .btn-cyan {
   background: linear-gradient(135deg, var(--accent-cyan) 0%, #0891b2 100%);
   color: #fff;
@@ -181,7 +171,6 @@
   border-color: rgba(37, 99, 235, 0.3);
 }
 
-/* ── Smart Home (Home Assistant) ──────────────────── */
 
 .btn-ha {
   background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
@@ -198,14 +187,12 @@
   border: 1px solid rgba(0, 0, 0, 0.06);
 }
 
-/* Geräte Grid */
 .ha-device-grid {
   display: grid;
   grid-template-columns: 1fr;
   gap: 8px;
 }
 
-/* Einzelne Geräte-Karte */
 .ha-device-card {
   padding: 10px 14px;
   border-radius: 0.75rem;
@@ -224,7 +211,6 @@
   border-color: rgba(16, 185, 129, 0.2);
 }
 
-/* Toggle Button (iOS-Style Slider) */
 .ha-toggle-btn {
   position: relative;
   width: 44px;
@@ -257,7 +243,6 @@
   transform: translateX(20px);
 }
 
-/* ── Aktoren / Sensoren Sektions-Styles ──────────── */
 
 .ha-section-badge {
   font-size: 0.8rem;
@@ -278,7 +263,6 @@
   color: #0d9488;
 }
 
-/* Aktor-Karten: Blauer Akzent */
 .ha-card-aktor {
   border-left: 3px solid rgba(59, 130, 246, 0.3) !important;
 }
@@ -293,7 +277,6 @@
   box-shadow: 0 2px 8px rgba(59, 130, 246, 0.1);
 }
 
-/* Sensor-Karten: Teal Akzent */
 .ha-card-sensor {
   border-left: 3px solid rgba(20, 184, 166, 0.3) !important;
 }
@@ -302,13 +285,11 @@
   box-shadow: 0 2px 8px rgba(20, 184, 166, 0.1);
 }
 
-/* Sensor-Wert Anzeige */
 .ha-sensor-value {
   min-width: 60px;
   padding-left: 8px;
 }
 
-/* Automation Checkbox & Active Style */
 .ha-automation-check {
   width: 24px;
   height: 24px;

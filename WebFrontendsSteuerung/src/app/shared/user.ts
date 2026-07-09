@@ -20,8 +20,6 @@ export class UserService {
 
   constructor() {
     this.loadFromStorage();
-
-    // Beim allerersten Start: Default-Admin anlegen
     if (this.users.length === 0) {
       this.users.push({
         username: 'admin',
@@ -33,8 +31,6 @@ export class UserService {
       this.saveToStorage();
     }
   }
-
-  // ── CRUD ────────────────────────────────────────
 
   /** Gibt alle registrierten Nutzer zurück */
   getUsers(): UserProfile[] {
@@ -56,7 +52,6 @@ export class UserService {
 
   /** Fügt einen neuen Nutzer hinzu */
   addUser(username: string, password: string, isAdmin: boolean = false): boolean {
-    // Prüfen ob Username schon existiert
     if (this.getUserByName(username)) {
       return false;
     }
@@ -86,8 +81,6 @@ export class UserService {
     this.saveToStorage();
     return true;
   }
-
-  // ── Automatisierungs-Geräte ─────────────────────
 
   /** Gibt die Automatisierungs-Geräte eines Nutzers zurück */
   getAutomationDevices(username: string): string[] {
@@ -125,8 +118,6 @@ export class UserService {
     return user ? user.automationDevices.includes(entityId) : false;
   }
 
-  // ── Heizungs-Präferenzen ────────────────────────
-
   /** Prüft, ob jemand anders diese Heizung bereits in der Routine hat */
   getClimateOwner(entityId: string): string | null {
     for (const user of this.users) {
@@ -155,8 +146,6 @@ export class UserService {
       this.saveToStorage();
     }
   }
-
-  // ── Persistenz ──────────────────────────────────
 
   private loadFromStorage(): void {
     try {
