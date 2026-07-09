@@ -30,14 +30,14 @@ const STORAGE_KEY_CLIMATE_BASE = 'ha_climate_base_temps';
 export class HomeAssistantService {
 
   private serverUrl: string = 'http://192.168.178.57:8123';
-  private accessToken: string = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiIwZWFiOWMwNjgzODA0MzhmOTZiODFjODU1ZTQ4NDAwZCIsImlhdCI6MTc4MzM0OTc0NCwiZXhwIjoyMDk4NzA5NzQ0fQ.I-X1zOMbb9Zlm1PZg0rqE_gmiB9HFgt0o85KINgaSeI';
+  private accessToken: string = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiI0NDE5OTE2MWVjYTg0MDA4OWY0MTExZTc3ZmM1Yjg5MiIsImlhdCI6MTc4MzY0MDYyOCwiZXhwIjoyMDk5MDAwNjI4fQ.kWXbYhybTPYUjlkSiXVZ2DZniVSPDa6IXp_5QVZ_0_o';
   private roomFilter: string = 'DashboardTest';
   private climateBaseTemps: Record<string, number> = {};
 
   constructor() {
     if (typeof localStorage !== 'undefined') {
       this.serverUrl = localStorage.getItem(STORAGE_KEY_URL) ?? 'http://192.168.178.57:8123';
-      this.accessToken = localStorage.getItem(STORAGE_KEY_TOKEN) ?? 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiIwZWFiOWMwNjgzODA0MzhmOTZiODFjODU1ZTQ4NDAwZCIsImlhdCI6MTc4MzM0OTc0NCwiZXhwIjoyMDk4NzA5NzQ0fQ.I-X1zOMbb9Zlm1PZg0rqE_gmiB9HFgt0o85KINgaSeI';
+      this.accessToken = localStorage.getItem(STORAGE_KEY_TOKEN) ?? 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiI0NDE5OTE2MWVjYTg0MDA4OWY0MTExZTc3ZmM1Yjg5MiIsImlhdCI6MTc4MzY0MDYyOCwiZXhwIjoyMDk5MDAwNjI4fQ.kWXbYhybTPYUjlkSiXVZ2DZniVSPDa6IXp_5QVZ_0_o';
       this.roomFilter = localStorage.getItem(STORAGE_KEY_ROOM) ?? 'DashboardTest';
       const baseTempsStr = localStorage.getItem(STORAGE_KEY_CLIMATE_BASE);
       if (baseTempsStr) {
