@@ -6,7 +6,7 @@
 
       <div class="d-flex flex-wrap align-items-center gap-3">
         <h2 class="mb-0 fw-bold d-flex align-items-center gap-2">
-          <span>🏠</span> Schlüsselbox Steuerung
+          Schlüsselbox Steuerung
         </h2>
 
         <!-- Verbindungsstatus mit Puls-Animation -->
@@ -28,29 +28,28 @@
             <path
               d="M11 1a2 2 0 0 0-2 2v4a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h5V3a3 3 0 0 1 6 0v4a.5.5 0 0 1-1 0V3a2 2 0 0 0-2-2z" />
           </svg>
-          🔓 Tür offen
+          Tür offen
           } @else {
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
             <path
               d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z" />
           </svg>
-          🔒 Tür geschlossen
+          Tür geschlossen
           }
         </span>
       </div>
 
       <div class="d-flex flex-wrap align-items-center gap-2">
         <!-- Eingeloggter Nutzer -->
-        <span class="badge rounded-3 px-3 py-2 d-flex align-items-center gap-1"
-          style="background: rgba(139, 92, 246, 0.1); color: #7c3aed; font-size: 0.8rem;">
-          👤 {{ auth.getCurrentUsername() }}
+        <span class="btn-settings rounded-3 px-3 py-2 d-flex align-items-center gap-2 fw-semibold">
+          {{ auth.getCurrentUsername() }}
         </span>
 
         <!-- Admin-Panel Button (nur für Admins) -->
         @if (auth.isAdmin()) {
         <button class="btn btn-settings rounded-3 px-3 py-2 d-flex align-items-center gap-2"
           [class.active]="adminPanelOpen()" (click)="toggleAdminPanel()">
-          👥 Nutzer
+          Nutzer
         </button>
         }
 
@@ -76,7 +75,7 @@
   @if (settingsOpen() && auth.isAdmin()) {
   <div class="card glass-card border-0 p-4 mb-4">
     <h5 class="mb-3 text-warning d-flex align-items-center gap-2">
-      <span>⚙️</span> Verbindungseinstellungen
+      Verbindungseinstellungen
     </h5>
     <div class="row g-3 align-items-center">
       <div class="col-12 col-md-12">
@@ -128,9 +127,9 @@
   <!-- OBERER BEREICH: DIE VISUELLE SCHLÜSSELBOX -->
   <section class="card glass-card border-0 mb-4">
     <div class="card-body p-4">
-      <h5 class="mb-4 fw-bold text-muted uppercase tracking-wider" style="font-size: 0.85rem; letter-spacing: 1px;">
-        🔑 SCHLÜSSEL STECKPLÄTZE
-      </h5>
+      <h6 class="text-muted fw-bold mb-4" style="font-size: 0.85rem; letter-spacing: 1px;">
+        SCHLÜSSEL STECKPLÄTZE
+      </h6>
 
       <div class="keybox-cabinet p-4">
         <div class="row row-cols-2 row-cols-sm-3 row-cols-md-5 g-4 justify-content-center">
@@ -185,7 +184,7 @@
 
           <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
             <h5 class="card-title mb-0 d-flex align-items-center gap-2">
-              <span>📜</span> System-Protokoll (MQTT)
+              System-Protokoll (MQTT)
             </h5>
             <span class="badge font-monospace px-3 py-1 text-wrap text-start"
               style="background: rgba(0, 0, 0, 0.04); color: var(--accent-cyan); border: 1px solid rgba(0, 0, 0, 0.08); max-width: 100%;">
@@ -241,7 +240,7 @@
       <section class="card glass-card border-0">
         <div class="card-body p-4">
           <h5 class="card-title text-info mb-3 d-flex align-items-center gap-2">
-            <span>☁️</span> Wetter (Soest)
+            Wetter (Soest)
           </h5>
 
           <!-- Wetter Live Anzeige -->
@@ -310,7 +309,7 @@
       <section class="card glass-card border-0">
         <div class="card-body p-4">
           <h5 class="card-title text-success mb-3 d-flex align-items-center gap-2">
-            <span>🗑️</span> Müllabfuhr
+            Müllabfuhr
           </h5>
 
           <button class="btn btn-emerald w-100 mb-4 shadow-sm fw-bold py-2.5" (click)="ermittleLiveMuell()">
@@ -361,7 +360,7 @@
       <!-- Header mit Titel + Settings-Button -->
       <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
         <h5 class="card-title mb-0 d-flex align-items-center gap-2">
-          <span>🏠</span> Smart Home
+          Smart Home
           @if (haConnected()) {
           <span class="badge rounded-3 px-2 py-1"
             style="background: rgba(16, 185, 129, 0.12); color: #10b981; font-size: 0.7rem;">
@@ -443,7 +442,7 @@
       @if (haError()) {
       <div class="alert d-flex align-items-center gap-2 mb-3 rounded-3 fw-semibold"
         style="background: rgba(239, 68, 68, 0.18); border: 2px solid rgba(239, 68, 68, 0.5); color: #b91c1c;">
-        <span style="font-size: 1.2rem;">⚠️</span> {{ haError() }}
+        {{ haError() }}
         <button class="btn btn-sm btn-outline-danger ms-auto rounded-3 px-3" (click)="ladeSmartHomeGeraete()">
           Erneut versuchen
         </button>
@@ -453,7 +452,7 @@
       <!-- Nicht konfiguriert -->
       @if (!ha.isConfigured() && !haSettingsOpen()) {
       <div class="text-center py-4 text-muted">
-        <p class="mb-2" style="font-size: 2rem;">🔌</p>
+        <p class="mb-2" style="font-size: 2rem;"></p>
         <p class="mb-1 fw-medium">Noch nicht verbunden</p>
         <p class="small mb-0">Klicke auf <strong>HA Config</strong>, um deinen Home Assistant Server zu verbinden.</p>
       </div>
@@ -591,7 +590,6 @@
                     <div class="mt-1">
                       @if (isClimateLockedForMe(entity.entity_id)) {
                         <div class="alert alert-secondary py-2 mb-0 d-flex align-items-center justify-content-center gap-2" style="font-size: 0.8rem; background: rgba(0,0,0,0.04); border: none;">
-                          <span>🔒</span>
                           <span>Blockiert (Gesteuert von <strong>{{ getClimateOwner(entity.entity_id) }}</strong>)</span>
                         </div>
                       } @else {
@@ -689,5 +687,14 @@
     </div>
   </section>
   }
+
+  <footer class="mt-5 text-center pb-4" style="opacity: 0.7;">
+    <a href="https://github.com/M1ch1111/Web-Frontends-Schluesselbox-Steuerung" target="_blank" rel="noopener noreferrer" class="text-muted text-decoration-none small d-inline-flex align-items-center gap-2" style="transition: opacity 0.2s; cursor: pointer;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.7'">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-github" viewBox="0 0 16 16">
+        <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z"/>
+      </svg>
+      GitHub Repository ansehen
+    </a>
+  </footer>
 
 </main>
