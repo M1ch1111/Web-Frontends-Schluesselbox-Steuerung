@@ -1,39 +1,32 @@
-# 🔑 Schlüsselbox-Steuerung (Web-Frontend)
+# Disclaimer: KI-Unterstuetzung
+Teile dieses Projekts (insbesondere Code-Strukturierung, Styling und Dokumentation) wurden unterstuetzend mit Hilfe von Kuenstlicher Intelligenz generiert.
 
-Dieses Projekt ist das Angular-basierte Web-Frontend für eine smarte Schlüsselbox-Steuerung (IoT-Projekt). Es ermöglicht die Überwachung und Verwaltung von Schlüsseln, die an einem ESP32-Mikrocontroller mit RFID-Lesern hängen, sowie die Steuerung von Smart Home Geräten (Home Assistant) und die Anzeige von Live-Wetter- sowie Müllabfuhrdaten.
+---
 
-## 🚀 Architektur & Technologien
+# Schluesselbox-Steuerung (Web-Frontend)
 
-Das Projekt wurde als moderne **Single Page Application (SPA)** umgesetzt und nutzt folgende Technologien:
+Dieses Projekt ist das Angular-basierte Web-Frontend fuer eine smarte Schluesselbox-Steuerung. Es ermoeglicht die Ueberwachung und Verwaltung von Schluesseln, die an einem ESP32-Mikrocontroller mit RFID-Lesern haengen, sowie die Steuerung von Smart Home Geraeten (Home Assistant) und die Anzeige von Live-Wetter- sowie Muellabfuhrdaten.
 
-*   **Angular 19** (Standalone Components, Signals für State-Management)
-*   **TypeScript** für Typsicherheit
-*   **Bootstrap 5 / CSS Grid & Flexbox** für ein responsives Design
-*   **MQTT über WebSockets** (`mqtt` npm package) für Echtzeit-Kommunikation mit der Hardware
-*   **REST APIs** für die Anbindung von Home Assistant, OpenMeteo (Wetter) und iCal-Parsern (Müllabfuhr)
+## Architektur & Technologien
 
-## 🛠️ Installation & Start
+Das Projekt wurde als Single Page Application (SPA) umgesetzt und nutzt folgende Technologien:
 
-Um das Projekt lokal auszuführen, wird Node.js benötigt.
+* Angular 19 (Standalone Components, Signals)
+* TypeScript
+* Bootstrap 5 / CSS Grid & Flexbox
+* MQTT ueber WebSockets zur Kommunikation mit der Hardware
+* REST APIs (Home Assistant, OpenMeteo, iCal-Parser)
 
-1.  **Abhängigkeiten installieren:**
-    ```bash
-    npm install
-    ```
+## Installation & Start
 
-2.  **Entwicklungsserver starten:**
-    ```bash
-    ng serve
-    ```
-3.  Öffne den Browser unter `http://localhost:4200/`.
+1. Abhaengigkeiten installieren:
+   npm install
 
-## 📦 Features
+2. Entwicklungsserver starten:
+   ng serve
 
-*   **Echtzeit-Synchronisation (MQTT):** Sobald ein Schlüssel aus der Box entnommen wird oder die Tür geöffnet wird, aktualisiert sich das Dashboard in Echtzeit (Pub/Sub Pattern).
-*   **Sicherheit:** Login-System mit Session-Speicherung im `localStorage` sowie konfigurierbare MQTT-Zugangsdaten (Standard: admin/admin).
-*   **Smart Home Integration:** Steuerung von Lampen, Steckdosen und Heizungen über die lokale Home Assistant REST API.
-*   **Responsive Glassmorphism-UI:** Modernes, halbtransparentes Design, das sowohl auf dem Smartphone als auch auf dem Desktop perfekt funktioniert.
+3. Browser oeffnen: http://localhost:4200/
 
-## 👥 Autoren
+## Autoren
 Entwickelt im Rahmen einer Hochschul-Abgabe.
-Github Repository: [https://github.com/M1ch1111/Web-Frontends-Schluesselbox-Steuerung](https://github.com/M1ch1111/Web-Frontends-Schluesselbox-Steuerung)
+Github Repository: https://github.com/M1ch1111/Web-Frontends-Schluesselbox-Steuerung
