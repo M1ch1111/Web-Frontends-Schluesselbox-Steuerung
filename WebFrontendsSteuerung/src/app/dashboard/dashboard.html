@@ -10,7 +10,7 @@
         </h2>
 
         <!-- Verbindungsstatus mit Puls-Animation -->
-        <span class="badge rounded-pill d-flex align-items-center px-3 py-2 fs-6 fw-medium shadow-sm"
+        <span class="badge rounded-3 d-flex align-items-center px-3 py-2 fs-6 fw-medium shadow-sm"
           [style.background]="isConnected() ? 'rgba(16, 185, 129, 0.15)' : 'rgba(239, 68, 68, 0.15)'"
           [style.color]="isConnected() ? '#34d399' : '#fca5a5'"
           [style.border]="isConnected() ? '1px solid rgba(16, 185, 129, 0.2)' : '1px solid rgba(239, 68, 68, 0.2)'">
@@ -19,7 +19,7 @@
         </span>
 
         <!-- Tür-Status -->
-        <span class="badge rounded-pill d-flex align-items-center gap-1 px-3 py-2 fs-6 fw-medium shadow-sm"
+        <span class="badge rounded-3 d-flex align-items-center gap-1 px-3 py-2 fs-6 fw-medium shadow-sm"
           [style.background]="tuerOffen() ? 'rgba(239, 68, 68, 0.15)' : 'rgba(255, 255, 255, 0.05)'"
           [style.color]="tuerOffen() ? '#fca5a5' : 'var(--text-muted)'"
           [style.border]="tuerOffen() ? '1px solid rgba(239, 68, 68, 0.2)' : '1px solid rgba(255, 255, 255, 0.08)'">
@@ -41,14 +41,14 @@
 
       <div class="d-flex flex-wrap align-items-center gap-2">
         <!-- Eingeloggter Nutzer -->
-        <span class="badge rounded-pill px-3 py-2 d-flex align-items-center gap-1"
+        <span class="badge rounded-3 px-3 py-2 d-flex align-items-center gap-1"
           style="background: rgba(139, 92, 246, 0.1); color: #7c3aed; font-size: 0.8rem;">
           👤 {{ auth.getCurrentUsername() }}
         </span>
 
         <!-- Admin-Panel Button (nur für Admins) -->
         @if (auth.isAdmin()) {
-        <button class="btn btn-settings rounded-pill px-3 py-2 d-flex align-items-center gap-2"
+        <button class="btn btn-settings rounded-3 px-3 py-2 d-flex align-items-center gap-2"
           [class.active]="adminPanelOpen()" (click)="toggleAdminPanel()">
           👥 Nutzer
         </button>
@@ -56,7 +56,7 @@
 
         <!-- Einstellungs-Zahnrad (nur Admin) -->
         @if (auth.isAdmin()) {
-        <button class="btn btn-settings rounded-pill px-3 py-2 d-flex align-items-center gap-2"
+        <button class="btn btn-settings rounded-3 px-3 py-2 d-flex align-items-center gap-2"
           [class.active]="settingsOpen()" (click)="toggleSettings()">
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16">
             <path
@@ -66,7 +66,7 @@
         </button>
         }
 
-        <button class="btn btn-outline-danger rounded-pill px-4" (click)="logout()">Abmelden</button>
+        <button class="btn btn-outline-danger rounded-3 px-4" (click)="logout()">Abmelden</button>
       </div>
 
     </div>
@@ -338,7 +338,7 @@
               </div>
 
               @if (muell.istHeute) {
-              <span class="badge bg-danger rounded-pill px-2 py-1 animate-pulse"
+              <span class="badge bg-danger rounded-3 px-2 py-1 animate-pulse"
                 style="font-size: 0.7rem; animation: pulse-ring 1.5s infinite;">Heute</span>
               }
             </li>
@@ -363,7 +363,7 @@
         <h5 class="card-title mb-0 d-flex align-items-center gap-2">
           <span>🏠</span> Smart Home
           @if (haConnected()) {
-          <span class="badge rounded-pill px-2 py-1"
+          <span class="badge rounded-3 px-2 py-1"
             style="background: rgba(16, 185, 129, 0.12); color: #10b981; font-size: 0.7rem;">
             Verbunden
           </span>
@@ -371,7 +371,7 @@
         </h5>
 
         <div class="d-flex flex-wrap align-items-center gap-2">
-          <button class="btn btn-settings rounded-pill px-3 py-2 d-flex align-items-center gap-2"
+          <button class="btn btn-settings rounded-3 px-3 py-2 d-flex align-items-center gap-2"
             [class.active]="haSettingsOpen()" (click)="toggleHaSettings()">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
               <path
@@ -381,7 +381,7 @@
           </button>
 
           @if (ha.isConfigured() && !haLoading()) {
-          <button class="btn btn-ha rounded-pill px-3 py-2 fw-semibold shadow-sm d-flex align-items-center gap-2"
+          <button class="btn btn-ha rounded-3 px-3 py-2 fw-semibold shadow-sm d-flex align-items-center gap-2"
             (click)="ladeSmartHomeGeraete()">
             Geräte & Sensoren aktualisieren
           </button>
@@ -444,7 +444,7 @@
       <div class="alert d-flex align-items-center gap-2 mb-3 rounded-3 fw-semibold"
         style="background: rgba(239, 68, 68, 0.18); border: 2px solid rgba(239, 68, 68, 0.5); color: #b91c1c;">
         <span style="font-size: 1.2rem;">⚠️</span> {{ haError() }}
-        <button class="btn btn-sm btn-outline-danger ms-auto rounded-pill px-3" (click)="ladeSmartHomeGeraete()">
+        <button class="btn btn-sm btn-outline-danger ms-auto rounded-3 px-3" (click)="ladeSmartHomeGeraete()">
           Erneut versuchen
         </button>
       </div>
@@ -464,7 +464,7 @@
       <div class="ha-section-block ha-section-aktor mb-0">
         <div class="d-flex align-items-center gap-2 mb-3">
           <span class="ha-section-badge ha-badge-aktor">⚡ Aktoren</span>
-          <span class="badge rounded-pill"
+          <span class="badge rounded-3"
             style="background: rgba(59, 130, 246, 0.1); color: #3b82f6; font-size: 0.65rem;">
             {{ getEntitiesByType('aktor').length }} Geräte
           </span>
@@ -533,7 +533,7 @@
           <div class="ha-section-block ha-section-climate mb-0">
             <div class="d-flex align-items-center gap-2 mb-3">
               <span class="ha-section-badge" style="background: rgba(249, 115, 22, 0.1); color: #ea580c; padding: 4px 10px; border-radius: 20px; font-weight: 700; font-size: 0.75rem;">🌡️ Heizung</span>
-              <span class="badge rounded-pill"
+              <span class="badge rounded-3"
                 style="background: rgba(249, 115, 22, 0.1); color: #ea580c; font-size: 0.65rem;">
                 {{ getEntitiesByType('climate').length }} Geräte
               </span>
@@ -644,7 +644,7 @@
       <div class="ha-section-block ha-section-sensor mb-0">
         <div class="d-flex align-items-center gap-2 mb-3">
           <span class="ha-section-badge ha-badge-sensor">📊 Sensoren</span>
-          <span class="badge rounded-pill"
+          <span class="badge rounded-3"
             style="background: rgba(20, 184, 166, 0.1); color: #14b8a6; font-size: 0.65rem;">
             {{ getEntitiesByType('sensor').length }} Geräte
           </span>
