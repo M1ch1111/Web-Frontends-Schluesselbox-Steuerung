@@ -175,7 +175,7 @@
   color: var(--text-main);
   transition: all 0.2s ease;
 }
-.btn-settings:hover, .btn-settings.active {
+.btn-settings.active {
   background: rgba(0, 0, 0, 0.08);
   color: var(--accent-violet);
   border-color: rgba(37, 99, 235, 0.3);
