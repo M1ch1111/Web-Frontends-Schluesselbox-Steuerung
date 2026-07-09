@@ -1,5 +1,5 @@
 # Disclaimer: KI-Unterstuetzung
-Teile dieses Projekts (insbesondere Code-Strukturierung, Styling und Dokumentation) wurden unterstuetzend mit Hilfe von Kuenstlicher Intelligenz generiert.
+Teile dieses Projekts (insbesondere Styling) wurden unterstuetzend mit Hilfe von Kuenstlicher Intelligenz generiert.
 
 ---
 
