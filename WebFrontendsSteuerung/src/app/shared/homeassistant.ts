@@ -29,14 +29,14 @@ const STORAGE_KEY_CLIMATE_BASE = 'ha_climate_base_temps';
 })
 export class HomeAssistantService {
 
-  private serverUrl: string = 'http://192.168.178.57:8123';
+  private serverUrl: string = 'http://Rasp5Uni.local:8123';
   private accessToken: string = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiI0NDE5OTE2MWVjYTg0MDA4OWY0MTExZTc3ZmM1Yjg5MiIsImlhdCI6MTc4MzY0MDYyOCwiZXhwIjoyMDk5MDAwNjI4fQ.kWXbYhybTPYUjlkSiXVZ2DZniVSPDa6IXp_5QVZ_0_o';
   private roomFilter: string = 'DashboardTest';
   private climateBaseTemps: Record<string, number> = {};
 
   constructor() {
     if (typeof localStorage !== 'undefined') {
-      this.serverUrl = localStorage.getItem(STORAGE_KEY_URL) ?? 'http://192.168.178.57:8123';
+      this.serverUrl = localStorage.getItem(STORAGE_KEY_URL) ?? 'http://Rasp5Uni.local:8123';
       this.accessToken = localStorage.getItem(STORAGE_KEY_TOKEN) ?? 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiI0NDE5OTE2MWVjYTg0MDA4OWY0MTExZTc3ZmM1Yjg5MiIsImlhdCI6MTc4MzY0MDYyOCwiZXhwIjoyMDk5MDAwNjI4fQ.kWXbYhybTPYUjlkSiXVZ2DZniVSPDa6IXp_5QVZ_0_o';
       this.roomFilter = localStorage.getItem(STORAGE_KEY_ROOM) ?? 'DashboardTest';
       const baseTempsStr = localStorage.getItem(STORAGE_KEY_CLIMATE_BASE);
@@ -123,7 +123,7 @@ export class HomeAssistantService {
           headers: this.getHeaders(),
           body: JSON.stringify({ template: `{{ area_entities('${this.roomFilter}') | tojson }}` })
         });
-        
+
         if (tplResponse.ok) {
           const areaEntities = await tplResponse.json();
           if (Array.isArray(areaEntities)) {
