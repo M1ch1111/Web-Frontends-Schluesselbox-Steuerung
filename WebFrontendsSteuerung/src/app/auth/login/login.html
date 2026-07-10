@@ -1,21 +1,17 @@
-<!-- Modernes, zentriertes Layout -->
 <main class="min-vh-100 w-100 d-flex align-items-center justify-content-center">
   <div class="container">
     <div class="row justify-content-center">
 
       <div class="col-12 col-sm-8 col-md-6 col-lg-4">
 
-        <!-- Glassmorphism Karte mit zarten Glow -->
-        <div class="card glass-card border-0 p-2">
+                <div class="card glass-card border-0 p-2">
           <div class="card-body p-4 p-md-5">
 
-            <!-- Logo / Icon Bereich mit lila Glühen -->
-            <div class="text-center mb-5">
+                        <div class="text-center mb-5">
               <div
                 class="bg-gradient-blue text-white rounded-circle d-inline-flex align-items-center justify-content-center shadow-lg mb-3"
                 style="width: 70px; height: 70px; background: linear-gradient(135deg, var(--accent-violet) 0%, var(--accent-cyan) 100%); box-shadow: 0 0 20px rgba(37, 99, 235, 0.4) !important;">
-                <!-- Schlüssel-Icon von Bootstrap -->
-                <svg xmlns="http://www.w3.org/2000/svg" width="34" height="34" fill="currentColor" viewBox="0 0 16 16">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="34" height="34" fill="currentColor" viewBox="0 0 16 16">
                   <path
                     d="M3.5 11.5a3.5 3.5 0 1 1 3.163-5H14L15.5 8 14 9.5l-1-1-1 1-1-1-1 1-1-1-1 1H6.663a3.5 3.5 0 0 1-3.163 2zM2.5 9a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z" />
                 </svg>
@@ -24,8 +20,7 @@
               <p class="text-muted small">Bitte melde dich an, um fortzufahren</p>
             </div>
 
-            <!-- Fehlermeldung mit weicherem Look -->
-            @if (login_error) {
+                        @if (login_error) {
             <div class="alert alert-danger rounded-3 border-0 px-3 py-2 mb-4 d-flex align-items-center gap-2"
               role="alert"
               style="background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.2) !important; color: #fecaca;">
@@ -37,8 +32,7 @@
             </div>
             }
 
-            <!-- Nativer Submit über das Formular -->
-            <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+                        <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
 
               <div class="mb-3">
                 <div class="form-floating">
@@ -91,8 +85,7 @@
           </div>
         </div>
 
-        <!-- Footer -->
-        <footer class="text-center mt-5">
+                <footer class="text-center mt-5">
           <small class="text-muted" style="letter-spacing: 0.5px;">Web Frontends Projekt SoSe26</small>
         </footer>
 

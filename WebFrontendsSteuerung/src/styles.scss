@@ -25,7 +25,6 @@ body {
   overflow-x: hidden;
 }
 
-/* Glassmorphism Card Style */
 .glass-card {
   background: var(--panel-bg);
   backdrop-filter: blur(16px);
@@ -40,7 +39,6 @@ body {
   box-shadow: 0 12px 40px 0 rgba(148, 163, 184, 0.2), 0 0 15px rgba(37, 99, 235, 0.05);
 }
 
-/* Heading & Text Styling */
 h1, h2, h3, h4, h5, h6 {
   color: var(--text-main) !important;
   font-weight: 600;
@@ -50,7 +48,6 @@ h1, h2, h3, h4, h5, h6 {
   color: var(--text-muted) !important;
 }
 
-/* Custom Input Field */
 .glass-input {
   background: rgba(255, 255, 255, 0.9) !important;
   border: 1px solid rgba(0, 0, 0, 0.15) !important;
@@ -70,7 +67,6 @@ h1, h2, h3, h4, h5, h6 {
   color: rgba(0, 0, 0, 0.35) !important;
 }
 
-/* Floating label updates */
 .form-floating > .glass-input:focus ~ label,
 .form-floating > .glass-input:not(:placeholder-shown) ~ label {
   color: var(--accent-violet) !important;
@@ -79,7 +75,6 @@ h1, h2, h3, h4, h5, h6 {
   color: rgba(0, 0, 0, 0.45);
 }
 
-/* Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;

@@ -1,16 +1,14 @@
 <main class="container mt-4 mb-5">
 
-  <!-- KOPFZEILE (Modernes Glassmorphism Dashboard Header) -->
-  <header class="glass-card border-0 p-4 mb-4">
+    <header class="glass-card border-0 p-4 mb-4">
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
 
       <div class="d-flex flex-wrap align-items-center gap-3">
         <h2 class="mb-0 fw-bold d-flex align-items-center gap-2">
-          <span>🏠</span> Schlüsselbox Steuerung
+          Schlüsselbox Steuerung
         </h2>
 
-        <!-- Verbindungsstatus mit Puls-Animation -->
-        <span class="badge rounded-pill d-flex align-items-center px-3 py-2 fs-6 fw-medium shadow-sm"
+                <span class="badge rounded-3 d-flex align-items-center px-3 py-2 fs-6 fw-medium shadow-sm"
           [style.background]="isConnected() ? 'rgba(16, 185, 129, 0.15)' : 'rgba(239, 68, 68, 0.15)'"
           [style.color]="isConnected() ? '#34d399' : '#fca5a5'"
           [style.border]="isConnected() ? '1px solid rgba(16, 185, 129, 0.2)' : '1px solid rgba(239, 68, 68, 0.2)'">
@@ -18,8 +16,7 @@
           {{ isConnected() ? 'Online' : 'Offline' }}
         </span>
 
-        <!-- Tür-Status -->
-        <span class="badge rounded-pill d-flex align-items-center gap-1 px-3 py-2 fs-6 fw-medium shadow-sm"
+                <span class="badge rounded-3 d-flex align-items-center gap-1 px-3 py-2 fs-6 fw-medium shadow-sm"
           [style.background]="tuerOffen() ? 'rgba(239, 68, 68, 0.15)' : 'rgba(255, 255, 255, 0.05)'"
           [style.color]="tuerOffen() ? '#fca5a5' : 'var(--text-muted)'"
           [style.border]="tuerOffen() ? '1px solid rgba(239, 68, 68, 0.2)' : '1px solid rgba(255, 255, 255, 0.08)'">
@@ -28,35 +25,31 @@
             <path
               d="M11 1a2 2 0 0 0-2 2v4a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h5V3a3 3 0 0 1 6 0v4a.5.5 0 0 1-1 0V3a2 2 0 0 0-2-2z" />
           </svg>
-          🔓 Tür offen
+          Tür offen
           } @else {
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
             <path
               d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z" />
           </svg>
-          🔒 Tür geschlossen
+          Tür geschlossen
           }
         </span>
       </div>
 
       <div class="d-flex flex-wrap align-items-center gap-2">
-        <!-- Eingeloggter Nutzer -->
-        <span class="badge rounded-pill px-3 py-2 d-flex align-items-center gap-1"
-          style="background: rgba(139, 92, 246, 0.1); color: #7c3aed; font-size: 0.8rem;">
-          👤 {{ auth.getCurrentUsername() }}
+                <span class="btn-settings rounded-3 px-3 py-2 d-flex align-items-center gap-2 fw-semibold">
+          {{ auth.getCurrentUsername() }}
         </span>
 
-        <!-- Admin-Panel Button (nur für Admins) -->
-        @if (auth.isAdmin()) {
-        <button class="btn btn-settings rounded-pill px-3 py-2 d-flex align-items-center gap-2"
+                @if (auth.isAdmin()) {
+        <button class="btn btn-settings rounded-3 px-3 py-2 d-flex align-items-center gap-2"
           [class.active]="adminPanelOpen()" (click)="toggleAdminPanel()">
-          👥 Nutzer
+          Nutzer
         </button>
         }
 
-        <!-- Einstellungs-Zahnrad (nur Admin) -->
-        @if (auth.isAdmin()) {
-        <button class="btn btn-settings rounded-pill px-3 py-2 d-flex align-items-center gap-2"
+                @if (auth.isAdmin()) {
+        <button class="btn btn-settings rounded-3 px-3 py-2 d-flex align-items-center gap-2"
           [class.active]="settingsOpen()" (click)="toggleSettings()">
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16">
             <path
@@ -66,17 +59,16 @@
         </button>
         }
 
-        <button class="btn btn-outline-danger rounded-pill px-4" (click)="logout()">Abmelden</button>
+        <button class="btn btn-outline-danger rounded-3 px-4" (click)="logout()">Abmelden</button>
       </div>
 
     </div>
   </header>
 
-  <!-- EINSTELLUNGEN PANEL (Ausklappbar) -->
-  @if (settingsOpen() && auth.isAdmin()) {
+    @if (settingsOpen() && auth.isAdmin()) {
   <div class="card glass-card border-0 p-4 mb-4">
     <h5 class="mb-3 text-warning d-flex align-items-center gap-2">
-      <span>⚙️</span> Verbindungseinstellungen
+      Verbindungseinstellungen
     </h5>
     <div class="row g-3 align-items-center">
       <div class="col-12 col-md-12">
@@ -114,8 +106,7 @@
   </div>
   }
 
-  <!-- ADMIN-PANEL: Nutzerverwaltung (nur für Admins sichtbar) -->
-  @if (adminPanelOpen() && auth.isAdmin()) {
+    @if (adminPanelOpen() && auth.isAdmin()) {
   <app-admin-panel
     [users]="userService.getUsers()"
     [currentUsername]="auth.getCurrentUsername()"
@@ -125,12 +116,11 @@
   </app-admin-panel>
   }
 
-  <!-- OBERER BEREICH: DIE VISUELLE SCHLÜSSELBOX -->
-  <section class="card glass-card border-0 mb-4">
+    <section class="card glass-card border-0 mb-4">
     <div class="card-body p-4">
-      <h5 class="mb-4 fw-bold text-muted uppercase tracking-wider" style="font-size: 0.85rem; letter-spacing: 1px;">
-        🔑 SCHLÜSSEL STECKPLÄTZE
-      </h5>
+      <h6 class="text-muted fw-bold mb-4" style="font-size: 0.85rem; letter-spacing: 1px;">
+        SCHLÜSSEL STECKPLÄTZE
+      </h6>
 
       <div class="keybox-cabinet p-4">
         <div class="row row-cols-2 row-cols-sm-3 row-cols-md-5 g-4 justify-content-center">
@@ -143,14 +133,12 @@
 
               <div class="key-hole">
                 @if (platz !== 'leer') {
-                <!-- Detaillierter Schlüssel SVG (Glow per CSS) -->
-                <svg class="key-graphic" viewBox="0 0 16 16" fill="currentColor">
+                                <svg class="key-graphic" viewBox="0 0 16 16" fill="currentColor">
                   <path
                     d="M3.5 11.5a3.5 3.5 0 1 1 3.163-5H14L15.5 8 14 9.5l-1-1-1 1-1-1-1 1-1-1-1 1H6.663a3.5 3.5 0 0 1-3.163 2zM2.5 9a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z" />
                 </svg>
                 } @else {
-                <!-- Leeres Schloss Symbol -->
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
                   class="text-muted opacity-25" viewBox="0 0 16 16">
                   <path
                     d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z" />
@@ -175,17 +163,15 @@
     </div>
   </section>
 
-  <!-- UNTERER BEREICH: GETEILT IN ZWEI SPALTEN -->
-  <div class="row g-4">
+    <div class="row g-4">
 
-    <!-- LINKS: TERMINAL LOGS -->
-    <div class="col-lg-8">
+        <div class="col-lg-8">
       <section class="card glass-card border-0 h-100">
         <div class="card-body p-4 d-flex flex-column h-100">
 
           <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
             <h5 class="card-title mb-0 d-flex align-items-center gap-2">
-              <span>📜</span> System-Protokoll (MQTT)
+              System-Protokoll (MQTT)
             </h5>
             <span class="badge font-monospace px-3 py-1 text-wrap text-start"
               style="background: rgba(0, 0, 0, 0.04); color: var(--accent-cyan); border: 1px solid rgba(0, 0, 0, 0.08); max-width: 100%;">
@@ -194,8 +180,7 @@
 
           </div>
 
-          <!-- Terminal Container -->
-          <div class="terminal-container rounded-3 flex-grow-1 d-flex flex-column"
+                    <div class="terminal-container rounded-3 flex-grow-1 d-flex flex-column"
             style="min-height: 400px; max-height: 500px;">
             <div class="terminal-header">
               <span class="terminal-dot bg-danger"></span>
@@ -234,18 +219,15 @@
       </section>
     </div>
 
-    <!-- RECHTS: IOT WIDGETS -->
-    <div class="col-lg-4 d-flex flex-column gap-4">
+        <div class="col-lg-4 d-flex flex-column gap-4">
 
-      <!-- WETTER WIDGET -->
-      <section class="card glass-card border-0">
+            <section class="card glass-card border-0">
         <div class="card-body p-4">
           <h5 class="card-title text-info mb-3 d-flex align-items-center gap-2">
-            <span>☁️</span> Wetter (Soest)
+            Wetter (Soest)
           </h5>
 
-          <!-- Wetter Live Anzeige -->
-          <div class="d-flex align-items-center gap-3 mb-4 p-3 rounded-3"
+                    <div class="d-flex align-items-center gap-3 mb-4 p-3 rounded-3"
             style="background: rgba(0,0,0,0.02); border: 1px solid rgba(0,0,0,0.05);">
             <div class="weather-icon-container">
               @if (weatherCode() === null) {
@@ -256,34 +238,28 @@
                   d="M5.255 5.786a.237.237 0 0 0 .241.247h.825c.138 0 .248-.113.266-.25.09-.656.54-1.134 1.342-1.134.686 0 1.314.343 1.314 1.168 0 .635-.374.927-.962 1.354-.528.381-1.182.8-1.182 1.822v.477c0 .138.112.25.25.25h.75c.138 0 .25-.112.25-.25v-.432c0-.764.39-1.077 1.018-1.564.53-.412 1.199-.877 1.199-2.003 0-1.423-1.095-2.39-2.53-2.39-1.392 0-2.478.96-2.585 2.378zm2.748 6.002a.987.987 0 1 0 0-1.974.987.987 0 0 0 0 1.974z" />
               </svg>
               } @else if (weatherCode() === 0) {
-              <!-- Sonnig -->
-              <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="#f59e0b" class="bi bi-sun-fill"
+                            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="#f59e0b" class="bi bi-sun-fill"
                 viewBox="0 0 16 16" style="filter: drop-shadow(0 0 8px rgba(245, 158, 11, 0.3));">
                 <path
                   d="M8 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM8 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 0zm0 13a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 13zm8-5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2a.5.5 0 0 1 .5.5zM3 8a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2A.5.5 0 0 1 3 8zm10.657-5.657a.5.5 0 0 1 0 .707l-1.414 1.415a.5.5 0 1 1-.707-.708l1.414-1.414a.5.5 0 0 1 .707 0zm-9.193 9.193a.5.5 0 0 1 0 .707L3.05 13.657a.5.5 0 0 1-.707-.707l1.414-1.414a.5.5 0 0 1 .707 0zm9.193 2.121a.5.5 0 0 1-.707 0l-1.414-1.414a.5.5 0 0 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .707zM4.464 4.465a.5.5 0 0 1-.707 0L2.343 3.05a.5.5 0 1 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .708z" />
               </svg>
-              } @else if (weatherCode()! >= 1 && weatherCode()! <= 3) { <!-- Bewölkt -->
-                <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="#94a3b8" viewBox="0 0 16 16">
+              } @else if (weatherCode()! >= 1 && weatherCode()! <= 3) {                 <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="#94a3b8" viewBox="0 0 16 16">
                   <path d="M13.405 7.027a5.001 5.001 0 0 0-9.499-1.004A3.5 3.5 0 1 0 3.5 13H13a3 3 0 0 0 .405-5.973z" />
                 </svg>
-                } @else if (weatherCode()! >= 45 && weatherCode()! <= 48) { <!-- Nebel -->
-                  <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="#cbd5e1" viewBox="0 0 16 16">
+                } @else if (weatherCode()! >= 45 && weatherCode()! <= 48) {                   <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="#cbd5e1" viewBox="0 0 16 16">
                     <path
                       d="M13.405 7.027a5.001 5.001 0 0 0-9.499-1.004A3.5 3.5 0 1 0 3.5 13H13a3 3 0 0 0 .405-5.973zM2.5 15a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5z" />
                   </svg>
-                  } @else if (weatherCode()! >= 51 && weatherCode()! <= 67) { <!-- Regen -->
-                    <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="#38bdf8" viewBox="0 0 16 16">
+                  } @else if (weatherCode()! >= 51 && weatherCode()! <= 67) {                     <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="#38bdf8" viewBox="0 0 16 16">
                       <path
                         d="M4.158 12.025a.5.5 0 0 1 .316.633l-.5 1.5a.5.5 0 0 1-.948-.316l.5-1.5a.5.5 0 0 1 .632-.317zm3 0a.5.5 0 0 1 .316.633l-1 3a.5.5 0 0 1-.948-.316l1-3a.5.5 0 0 1 .632-.317zm3 0a.5.5 0 0 1 .316.633l-.5 1.5a.5.5 0 0 1-.948-.316l.5-1.5a.5.5 0 0 1 .632-.317zm3 0a.5.5 0 0 1 .316.633l-1 3a.5.5 0 0 1-.948-.316l1-3a.5.5 0 0 1 .632-.317zM13.405 7.027a5.001 5.001 0 0 0-9.499-1.004A3.5 3.5 0 1 0 3.5 13H13a3 3 0 0 0 .405-5.973z" />
                     </svg>
-                    } @else if (weatherCode()! >= 71 && weatherCode()! <= 77) { <!-- Schnee -->
-                      <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="#e2e8f0" viewBox="0 0 16 16">
+                    } @else if (weatherCode()! >= 71 && weatherCode()! <= 77) {                       <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="#e2e8f0" viewBox="0 0 16 16">
                         <path
                           d="M8 16a.5.5 0 0 1-.5-.5v-1.293l-.646.647a.5.5 0 0 1-.707-.708L7.5 12.793V8.866l-3.4 1.963.5 2.5a.5.5 0 0 1-.98.196l-.378-1.89-1.3 1.3a.5.5 0 0 1-.707-.707l1.3-1.3-1.89-.379a.5.5 0 0 1 .196-.98l2.5.5 3.4-1.963v-3.2l-3.4 1.962.5 2.501a.5.5 0 0 1-.98.196l-.378-1.89-1.3 1.3a.5.5 0 0 1-.707-.707l1.3-1.3-1.89-.379a.5.5 0 0 1 .196-.98l2.5.5 3.4-1.963V5.5a.5.5 0 0 1 1 0v1.293l.646-.647a.5.5 0 0 1 .707.708L8.5 8.207v3.927l3.4-1.963-.5-2.5a.5.5 0 1 1 .98-.196l.378 1.89 1.3-1.3a.5.5 0 0 1 .707.707l-1.3 1.3 1.89.379a.5.5 0 0 1-.196.98l-2.5-.5-3.4 1.963v3.2l3.4-1.962-.5-2.501a.5.5 0 1 1 .98-.196l.378 1.89 1.3-1.3a.5.5 0 0 1 .707.707l-1.3 1.3 1.89.379a.5.5 0 0 1-.196.98l-2.5-.5-3.4 1.963V15.5a.5.5 0 0 1-.5.5z" />
                       </svg>
                       } @else if (weatherCode()! >= 95) {
-                      <!-- Gewitter -->
-                      <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="#3b82f6" viewBox="0 0 16 16"
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="#3b82f6" viewBox="0 0 16 16"
                         style="filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.2));">
                         <path
                           d="M11.251 10.457.572 13.64a.5.5 0 0 1-.708-.595l1-3.5a.5.5 0 0 1 .28-.316l2.5-1a.5.5 0 0 1 .632.316l.5 1.5a.5.5 0 0 1-.316.633l-1.5.5 1 2.5a.5.5 0 0 1 .708.595l-1-2.5.5-1.5a.5.5 0 0 1 .632-.316z" />
@@ -306,19 +282,17 @@
         </div>
       </section>
 
-      <!-- MÜLLABFUHR WIDGET -->
-      <section class="card glass-card border-0">
+            <section class="card glass-card border-0">
         <div class="card-body p-4">
           <h5 class="card-title text-success mb-3 d-flex align-items-center gap-2">
-            <span>🗑️</span> Müllabfuhr
+            Müllabfuhr
           </h5>
 
           <button class="btn btn-emerald w-100 mb-4 shadow-sm fw-bold py-2.5" (click)="ermittleLiveMuell()">
             Kalender prüfen & senden
           </button>
 
-          <!-- DIE NEUE VORSCHAU FÜR DIE NÄCHSTEN 7 TAGE -->
-          <h6 class="text-muted fw-bold mb-2 font-monospace" style="font-size: 0.75rem;">KOMMENDE ABHOLUNGEN:</h6>
+                    <h6 class="text-muted fw-bold mb-2 font-monospace" style="font-size: 0.75rem;">KOMMENDE ABHOLUNGEN:</h6>
 
           @if (upcomingMuell().length === 0) {
           <div class="alert alert-light border text-center py-2 text-muted small mb-0"
@@ -338,7 +312,7 @@
               </div>
 
               @if (muell.istHeute) {
-              <span class="badge bg-danger rounded-pill px-2 py-1 animate-pulse"
+              <span class="badge bg-danger rounded-3 px-2 py-1 animate-pulse"
                 style="font-size: 0.7rem; animation: pulse-ring 1.5s infinite;">Heute</span>
               }
             </li>
@@ -354,16 +328,14 @@
 
   </div>
 
-  <!-- ── SMART HOME SEKTION (Home Assistant) ────────────── -->
-  <section class="card glass-card border-0 mt-4">
+    <section class="card glass-card border-0 mt-4">
     <div class="card-body p-4">
 
-      <!-- Header mit Titel + Settings-Button -->
-      <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
         <h5 class="card-title mb-0 d-flex align-items-center gap-2">
-          <span>🏠</span> Smart Home
+          Smart Home
           @if (haConnected()) {
-          <span class="badge rounded-pill px-2 py-1"
+          <span class="badge rounded-3 px-2 py-1"
             style="background: rgba(16, 185, 129, 0.12); color: #10b981; font-size: 0.7rem;">
             Verbunden
           </span>
@@ -371,7 +343,7 @@
         </h5>
 
         <div class="d-flex flex-wrap align-items-center gap-2">
-          <button class="btn btn-settings rounded-pill px-3 py-2 d-flex align-items-center gap-2"
+          <button class="btn btn-settings rounded-3 px-3 py-2 d-flex align-items-center gap-2"
             [class.active]="haSettingsOpen()" (click)="toggleHaSettings()">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
               <path
@@ -381,7 +353,7 @@
           </button>
 
           @if (ha.isConfigured() && !haLoading()) {
-          <button class="btn btn-ha rounded-pill px-3 py-2 fw-semibold shadow-sm d-flex align-items-center gap-2"
+          <button class="btn btn-ha rounded-3 px-3 py-2 fw-semibold shadow-sm d-flex align-items-center gap-2"
             (click)="ladeSmartHomeGeraete()">
             Geräte & Sensoren aktualisieren
           </button>
@@ -389,8 +361,7 @@
         </div>
       </div>
 
-      <!-- Einstellungs-Panel (ausklappbar) -->
-      @if (haSettingsOpen()) {
+            @if (haSettingsOpen()) {
       <div class="ha-config-panel rounded-3 p-3 mb-4">
         <div class="row g-3">
           <div class="col-12 col-md-5">
@@ -429,8 +400,7 @@
       </div>
       }
 
-      <!-- Ladevorgang -->
-      @if (haLoading()) {
+            @if (haLoading()) {
       <div class="text-center py-5">
         <div class="spinner-border text-primary" role="status">
           <span class="visually-hidden">Laden...</span>
@@ -439,32 +409,29 @@
       </div>
       }
 
-      <!-- Fehlermeldung -->
-      @if (haError()) {
+            @if (haError()) {
       <div class="alert d-flex align-items-center gap-2 mb-3 rounded-3 fw-semibold"
         style="background: rgba(239, 68, 68, 0.18); border: 2px solid rgba(239, 68, 68, 0.5); color: #b91c1c;">
-        <span style="font-size: 1.2rem;">⚠️</span> {{ haError() }}
-        <button class="btn btn-sm btn-outline-danger ms-auto rounded-pill px-3" (click)="ladeSmartHomeGeraete()">
+        {{ haError() }}
+        <button class="btn btn-sm btn-outline-danger ms-auto rounded-3 px-3" (click)="ladeSmartHomeGeraete()">
           Erneut versuchen
         </button>
       </div>
       }
 
-      <!-- Nicht konfiguriert -->
-      @if (!ha.isConfigured() && !haSettingsOpen()) {
+            @if (!ha.isConfigured() && !haSettingsOpen()) {
       <div class="text-center py-4 text-muted">
-        <p class="mb-2" style="font-size: 2rem;">🔌</p>
+        <p class="mb-2" style="font-size: 2rem;"></p>
         <p class="mb-1 fw-medium">Noch nicht verbunden</p>
         <p class="small mb-0">Klicke auf <strong>HA Config</strong>, um deinen Home Assistant Server zu verbinden.</p>
       </div>
       }
 
-      <!-- ── AKTOREN (steuerbare Geräte) ──────────────── -->
-      @if (!haLoading() && hasAktoren()) {
+            @if (!haLoading() && hasAktoren()) {
       <div class="ha-section-block ha-section-aktor mb-0">
         <div class="d-flex align-items-center gap-2 mb-3">
           <span class="ha-section-badge ha-badge-aktor">⚡ Aktoren</span>
-          <span class="badge rounded-pill"
+          <span class="badge rounded-3"
             style="background: rgba(59, 130, 246, 0.1); color: #3b82f6; font-size: 0.65rem;">
             {{ getEntitiesByType('aktor').length }} Geräte
           </span>
@@ -478,8 +445,7 @@
               [class.ha-device-on]="entity.state === 'on'"
               [class.ha-automation-active]="isInAutomation(entity.entity_id)">
 
-              <!-- Automation-Checkbox -->
-              <button class="ha-automation-check" [class.checked]="isInAutomation(entity.entity_id)"
+                            <button class="ha-automation-check" [class.checked]="isInAutomation(entity.entity_id)"
                 (click)="toggleAutomationDevice(entity.entity_id)"
                 title="Bei Schlüsselerkennung automatisch einschalten">
                 @if (isInAutomation(entity.entity_id)) {
@@ -509,8 +475,7 @@
                 </div>
               </div>
 
-              <!-- Toggle-Switch -->
-              <button class="ha-toggle-btn" [class.active]="entity.state === 'on'" (click)="toggleGeraet(entity)"
+                            <button class="ha-toggle-btn" [class.active]="entity.state === 'on'" (click)="toggleGeraet(entity)"
                 title="Umschalten">
                 <div class="ha-toggle-knob"></div>
               </button>
@@ -526,14 +491,13 @@
     </div>
   </section>
 
-      <!-- ── HEIZUNG (Climate) ──────────────── -->
-      @if (!haLoading() && hasClimate()) {
+            @if (!haLoading() && hasClimate()) {
       <section class="card glass-card border-0 mt-4">
         <div class="card-body p-4">
           <div class="ha-section-block ha-section-climate mb-0">
             <div class="d-flex align-items-center gap-2 mb-3">
               <span class="ha-section-badge" style="background: rgba(249, 115, 22, 0.1); color: #ea580c; padding: 4px 10px; border-radius: 20px; font-weight: 700; font-size: 0.75rem;">🌡️ Heizung</span>
-              <span class="badge rounded-pill"
+              <span class="badge rounded-3"
                 style="background: rgba(249, 115, 22, 0.1); color: #ea580c; font-size: 0.65rem;">
                 {{ getEntitiesByType('climate').length }} Geräte
               </span>
@@ -546,8 +510,7 @@
                 <div class="ha-device-card d-flex flex-column p-3 rounded-4" style="background: rgba(0,0,0,0.02); border: 1px solid rgba(0,0,0,0.05);"
                      [class.ha-automation-active]="isInAutomation(entity.entity_id)">
                   
-                  <!-- Header: Icon, Name, Ist-Wert -->
-                  <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
                     <div class="d-flex align-items-center gap-3">
                       <div class="ha-device-icon d-flex align-items-center justify-content-center rounded-circle"
                         style="width: 42px; height: 42px; min-width: 42px; font-size: 1.2rem; background: rgba(249, 115, 22, 0.1);">
@@ -566,8 +529,7 @@
 
                   <hr class="my-2" style="border-color: rgba(0,0,0,0.05);">
 
-                  <!-- Admin Ansicht -->
-                  @if (auth.isAdmin()) {
+                                    @if (auth.isAdmin()) {
                     <div class="mt-2">
                       <label class="form-label text-muted mb-1" style="font-size: 0.8rem; font-weight: 600;">
                         Basis-Temperatur (Wenn leer):
@@ -586,12 +548,10 @@
                       </div>
                     </div>
                   } 
-                  <!-- Benutzer Ansicht -->
-                  @else {
+                                    @else {
                     <div class="mt-1">
                       @if (isClimateLockedForMe(entity.entity_id)) {
                         <div class="alert alert-secondary py-2 mb-0 d-flex align-items-center justify-content-center gap-2" style="font-size: 0.8rem; background: rgba(0,0,0,0.04); border: none;">
-                          <span>🔒</span>
                           <span>Blockiert (Gesteuert von <strong>{{ getClimateOwner(entity.entity_id) }}</strong>)</span>
                         </div>
                       } @else {
@@ -637,14 +597,13 @@
       </section>
       }
 
-  <!-- ── SENSOREN (nur Anzeige) ──────────────── -->
-  @if (!haLoading() && hasSensoren()) {
+    @if (!haLoading() && hasSensoren()) {
   <section class="card glass-card border-0 mt-4">
     <div class="card-body p-4">
       <div class="ha-section-block ha-section-sensor mb-0">
         <div class="d-flex align-items-center gap-2 mb-3">
           <span class="ha-section-badge ha-badge-sensor">📊 Sensoren</span>
-          <span class="badge rounded-pill"
+          <span class="badge rounded-3"
             style="background: rgba(20, 184, 166, 0.1); color: #14b8a6; font-size: 0.65rem;">
             {{ getEntitiesByType('sensor').length }} Geräte
           </span>
@@ -671,8 +630,7 @@
                 </div>
               </div>
 
-              <!-- Sensor-Wert (groß + prominent) -->
-              <div class="ha-sensor-value text-end">
+                            <div class="ha-sensor-value text-end">
                 <span class="fw-bold" style="font-size: 1.1rem; color: #0f766e;">
                   {{ getEntityValue(entity) }}
                 </span>
@@ -689,5 +647,14 @@
     </div>
   </section>
   }
+
+  <footer class="mt-5 text-center pb-4" style="opacity: 0.7;">
+    <a href="https://github.com/M1ch1111/Web-Frontends-Schluesselbox-Steuerung" target="_blank" rel="noopener noreferrer" class="text-muted text-decoration-none small d-inline-flex align-items-center gap-2" style="transition: opacity 0.2s; cursor: pointer;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.7'">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-github" viewBox="0 0 16 16">
+        <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z"/>
+      </svg>
+      GitHub Repository ansehen
+    </a>
+  </footer>
 
 </main>

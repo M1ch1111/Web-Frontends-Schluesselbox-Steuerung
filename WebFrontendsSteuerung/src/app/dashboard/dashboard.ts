@@ -40,16 +40,12 @@ export class Dashboard implements OnInit, OnDestroy {
   settingsOpen = signal(false);
   wetterInfo = signal('Keine Daten (Bitte laden)');
   weatherCode = signal<number | null>(null);
-
-  // Home Assistant Signals
   haEntities = signal<HaEntity[]>([]);
   haGrouped = computed(() => this.ha.groupByDomain(this.haEntities()));
   haConnected = signal(false);
   haLoading = signal(false);
   haError = signal<string | null>(null);
   haSettingsOpen = signal(false);
-
-  // Admin-Panel
   adminPanelOpen = signal(false);
   userMessage = signal<string | null>(null);
 
@@ -83,8 +79,6 @@ export class Dashboard implements OnInit, OnDestroy {
       this.ermittleLiveMuell();
       this.ladeLiveWetter();
     }, 1500);
-
-    // Home Assistant: Geräte automatisch laden, wenn konfiguriert
     if (this.ha.isConfigured()) {
       this.ladeSmartHomeGeraete();
     }
@@ -122,8 +116,6 @@ export class Dashboard implements OnInit, OnDestroy {
 
   startHeartbeat() {
     if (this.heartbeatInterval) clearInterval(this.heartbeatInterval);
-    
-    // Check status every 10 seconds
     this.heartbeatInterval = setInterval(() => {
       this.frageStatusAb();
     }, 10000);
@@ -133,8 +125,6 @@ export class Dashboard implements OnInit, OnDestroy {
 
   resetTimeout() {
     if (this.timeoutTimer) clearTimeout(this.timeoutTimer);
-    
-    // If no message arrives within 15 seconds, assume offline
     this.timeoutTimer = setTimeout(() => {
       this.isConnected.set(false);
       this.boxStatus.set('Box ist offline');
@@ -167,8 +157,6 @@ export class Dashboard implements OnInit, OnDestroy {
           copy[platzNummer] = message;
           return copy;
         });
-
-        // ── Automatisierung: SmartHome-Geräte einschalten ──
         this.fuehreAutomatisierungAus(message);
       }
     } else if (topic.includes('entfernt')) {
@@ -280,7 +268,6 @@ export class Dashboard implements OnInit, OnDestroy {
           inEvent = false;
 
           if (eventDate && eventSummary) {
-            // Bereinigung von Restmüll-Zusätzen (nach Umlaut-Ersetzung)
             eventSummary = eventSummary
               .replace(" 14-taeglich", "")
               .replace(" 4-woechentl.", "")
@@ -344,8 +331,6 @@ export class Dashboard implements OnInit, OnDestroy {
     this.router.navigate(['/login']);
   }
 
-  // ── Home Assistant Methoden ─────────────────────────
-
   toggleHaSettings() {
     this.haSettingsOpen.update(open => !open);
   }
@@ -391,7 +376,6 @@ export class Dashboard implements OnInit, OnDestroy {
   async toggleGeraet(entity: HaEntity) {
     try {
       await this.ha.toggleEntity(entity);
-      // Status nach dem Toggle neu laden (ohne Spinner, um Springen zu verhindern)
       await this.ladeSmartHomeGeraete(false);
     } catch (error) {
       console.error('Fehler beim Schalten:', error);
@@ -464,8 +448,6 @@ export class Dashboard implements OnInit, OnDestroy {
     return (entity.attributes['max_temp'] as number | undefined) ?? 30;
   }
 
-  // ── Heizungs-Präferenzen & Basis-Temperatur ──────
-
   getClimateOwner(entityId: string): string | null {
     return this.userService.getClimateOwner(entityId);
   }
@@ -483,8 +465,6 @@ export class Dashboard implements OnInit, OnDestroy {
     const input = event.target as HTMLInputElement;
     const temp = parseFloat(input.value);
     this.ha.setBaseTemperature(entityId, temp);
-
-    // Prüfen ob gerade jemand eingecheckt ist, der die Heizung besitzt
     const owner = this.getClimateOwner(entityId);
     let ownerCheckedIn = false;
     if (owner && this.schluesselPlaetze().includes(owner)) {
@@ -492,7 +472,6 @@ export class Dashboard implements OnInit, OnDestroy {
     }
 
     if (!ownerCheckedIn) {
-      // Niemand da, der die Heizung besitzt -> Basis-Temp sofort live anwenden
       try {
         await this.ha.setClimateTemperature(entityId, temp);
         setTimeout(() => this.ladeSmartHomeGeraete(false), 1000);
@@ -506,8 +485,6 @@ export class Dashboard implements OnInit, OnDestroy {
     const username = this.auth.getCurrentUsername();
     const pref = this.userService.getClimatePreference(username, entityId);
     if (pref !== null) return pref;
-    
-    // Fallback: Aktuelle Target-Temp des Geräts
     const entity = this.haEntities().find(e => e.entity_id === entityId);
     if (entity) {
       return this.getClimateTargetTemp(entity);
@@ -520,8 +497,6 @@ export class Dashboard implements OnInit, OnDestroy {
     const input = event.target as HTMLInputElement;
     const temp = parseFloat(input.value);
     this.userService.setClimatePreference(username, entityId, temp);
-
-    // Wenn der Nutzer gerade eingecheckt ist, sofort anwenden
     if (this.schluesselPlaetze().includes(username)) {
       try {
         await this.ha.setClimateTemperature(entityId, temp);
@@ -531,8 +506,6 @@ export class Dashboard implements OnInit, OnDestroy {
       }
     }
   }
-
-  // ── Automatisierung ─────────────────────────────
 
   /** Führt die SmartHome-Automatisierung für einen erkannten Nutzer aus */
   async fuehreAutomatisierungAus(personName: string) {
@@ -548,7 +521,6 @@ export class Dashboard implements OnInit, OnDestroy {
     let eingeschaltet = 0;
 
     for (const entityId of user.automationDevices) {
-      // Aktuellen Status prüfen
       const entity = this.haEntities().find(e => e.entity_id === entityId);
       if (!entity) continue;
 
@@ -565,7 +537,6 @@ export class Dashboard implements OnInit, OnDestroy {
           }
         }
       } else {
-        // Nur einschalten wenn aktuell AUS (additives Verhalten)
         if (entity.state === 'off') {
           try {
             await this.ha.callService(domain, 'turn_on', entityId);
@@ -576,8 +547,6 @@ export class Dashboard implements OnInit, OnDestroy {
         }
       }
     }
-
-    // Status neu laden (ohne Ladespinner)
     if (eingeschaltet > 0) {
       await this.ladeSmartHomeGeraete(false);
       console.log(`✅ Automatisierung für "${personName}": ${eingeschaltet} Gerät(e) eingeschaltet`);
@@ -598,11 +567,7 @@ export class Dashboard implements OnInit, OnDestroy {
 
     console.log(`🏠 Automatisierung (Ausschalten) für "${personName}" wird ausgeführt...`);
     let ausgeschaltet = 0;
-
-    // Ermittle alle aktuell eingecheckten Nutzer (wir haben den aktuellen Nutzer ja schon aus dem Array entfernt)
     const aktuellEingecheckt = this.schluesselPlaetze().filter(name => name !== 'leer' && name !== personName);
-    
-    // Sammle alle Geräte, die von den ANDEREN aktuell eingecheckten Nutzern noch benötigt werden
     const benoetigteGeraete = new Set<string>();
     for (const andereName of aktuellEingecheckt) {
       const andererUser = this.userService.getUserByName(andereName);
@@ -614,13 +579,10 @@ export class Dashboard implements OnInit, OnDestroy {
     }
 
     for (const entityId of user.automationDevices) {
-      // Wenn ein anderer aktuell eingecheckter Nutzer dieses Gerät noch braucht, überspringen!
       if (benoetigteGeraete.has(entityId)) {
         console.log(`ℹ️ Gerät ${entityId} bleibt unangetastet, da es noch von einem anderen Nutzer benötigt wird.`);
         continue;
       }
-
-      // Aktuellen Status prüfen
       const entity = this.haEntities().find(e => e.entity_id === entityId);
       if (!entity) continue;
 
@@ -635,7 +597,6 @@ export class Dashboard implements OnInit, OnDestroy {
           console.error(`❌ Fehler beim Setzen der Basis-Temperatur für ${entityId}:`, error);
         }
       } else {
-        // Nur ausschalten wenn aktuell nicht AUS
         if (entity.state !== 'off') {
           try {
             await this.ha.callService(domain, 'turn_off', entityId);
@@ -646,8 +607,6 @@ export class Dashboard implements OnInit, OnDestroy {
         }
       }
     }
-
-    // Status neu laden (ohne Ladespinner)
     if (ausgeschaltet > 0) {
       await this.ladeSmartHomeGeraete(false);
       console.log(`✅ Automatisierung für "${personName}": ${ausgeschaltet} Gerät(e) ausgeschaltet`);
@@ -669,8 +628,6 @@ export class Dashboard implements OnInit, OnDestroy {
     if (!username) return false;
     return this.userService.isDeviceInAutomation(username, entityId);
   }
-
-  // ── Admin-Panel Methoden ─────────────────────────
 
   toggleAdminPanel() {
     this.adminPanelOpen.update(open => !open);

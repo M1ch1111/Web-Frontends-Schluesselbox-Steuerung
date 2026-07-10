@@ -60,14 +60,10 @@ describe('UserService', () => {
 
   it('should toggle automation devices', () => {
     service.addUser('michi', 'pw1', false);
-    
-    // Add
     let toggled = service.toggleAutomationDevice('michi', 'light.wohnzimmer');
     expect(toggled).toBe(true);
     expect(service.isDeviceInAutomation('michi', 'light.wohnzimmer')).toBe(true);
     expect(service.getAutomationDevices('michi')).toContain('light.wohnzimmer');
-    
-    // Remove
     toggled = service.toggleAutomationDevice('michi', 'light.wohnzimmer');
     expect(toggled).toBe(false);
     expect(service.isDeviceInAutomation('michi', 'light.wohnzimmer')).toBe(false);

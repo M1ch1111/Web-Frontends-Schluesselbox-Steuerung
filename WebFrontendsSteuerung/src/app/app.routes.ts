@@ -4,8 +4,6 @@ import { Login } from './auth/login/login';
 import { Dashboard } from './dashboard/dashboard';
 import { NotFound } from './not-found/not-found';
 import { AuthService } from './shared/auth';
-
-// Der funktionale Route Guard
 export const authGuard: CanActivateFn = () => {
   const authService = inject(AuthService);
   const router = inject(Router);
