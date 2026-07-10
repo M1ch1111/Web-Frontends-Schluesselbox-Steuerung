@@ -9,9 +9,9 @@ export const authGuard: CanActivateFn = () => {
   const router = inject(Router);
 
   if (authService.isLoggedIn()) {
-    return true; // Zugriff erlaubt
+    return true; 
   } else {
-    return router.parseUrl('/login'); // Zurück zum Login
+    return router.parseUrl('/login'); 
   }
 };
 
@@ -20,5 +20,5 @@ export const routes: Routes = [
   { path: 'dashboard', component: Dashboard, canActivate: [authGuard] },
   { path: '404', component: NotFound },
   { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
-  { path: '**', component: NotFound } // Wildcard zeigt 404 Seite
+  { path: '**', component: NotFound } 
 ];

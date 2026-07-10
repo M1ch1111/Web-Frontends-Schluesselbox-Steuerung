@@ -36,7 +36,7 @@ describe('UserService', () => {
     service.addUser('michi', 'pw1', false);
     const added = service.addUser('Michi', 'pw2', true);
     expect(added).toBe(false);
-    expect(service.getUsers().length).toBe(2); // admin + michi
+    expect(service.getUsers().length).toBe(2); 
   });
 
   it('should authenticate correctly', () => {

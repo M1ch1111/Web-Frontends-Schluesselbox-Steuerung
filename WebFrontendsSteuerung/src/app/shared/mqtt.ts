@@ -18,7 +18,7 @@ export class MqttService {
       this.disconnect();
     }
 
-    const brokerUrl = `ws://${brokerIp}:9001`;
+    const brokerUrl = `ws:
     console.log('Verbinde mit MQTT Broker:', brokerUrl);
     const mqtt = (mqttPkg as any).default || mqttPkg;
 

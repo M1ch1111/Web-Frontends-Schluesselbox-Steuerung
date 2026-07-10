@@ -5,10 +5,9 @@ import { Directive, ElementRef, HostBinding, HostListener, Input, OnChanges, Ren
   standalone: true
 })
 export class SlotStatusDirective implements OnChanges {
-  /** Der Belegungs-String des Slots, z. B. 'leer' oder ein Nutzername */
+  
   @Input('appSlotStatus') status: string = 'leer';
 
-  /** Setzt die CSS-Klasse 'occupied' automatisch, wenn der Slot belegt ist */
   @HostBinding('class.occupied')
   get isOccupied(): boolean {
     return this.status !== 'leer';

@@ -405,29 +405,24 @@ export class Dashboard implements OnInit, OnDestroy {
     return domain === 'light' || domain === 'switch' || domain === 'input_boolean';
   }
 
-  /** Gibt den Gerätetyp zurück: 'aktor', 'sensor' oder 'climate' */
   getEntityType(entity: HaEntity): 'aktor' | 'sensor' | 'climate' {
     const domain = this.ha.getDomain(entity.entity_id);
     if (domain === 'climate') return 'climate';
     return (domain === 'light' || domain === 'switch' || domain === 'input_boolean') ? 'aktor' : 'sensor';
   }
 
-  /** Prüft ob es Aktoren in der Geräteliste gibt */
   hasAktoren(): boolean {
     return this.haEntities().some(e => this.getEntityType(e) === 'aktor');
   }
 
-  /** Prüft ob es Sensoren in der Geräteliste gibt */
   hasSensoren(): boolean {
     return this.haEntities().some(e => this.getEntityType(e) === 'sensor');
   }
 
-  /** Prüft ob es Heizungen in der Geräteliste gibt */
   hasClimate(): boolean {
     return this.haEntities().some(e => this.getEntityType(e) === 'climate');
   }
 
-  /** Filtert Entitäten nach Typ */
   getEntitiesByType(type: 'aktor' | 'sensor' | 'climate'): HaEntity[] {
     return this.haEntities().filter(e => this.getEntityType(e) === type);
   }
@@ -489,7 +484,7 @@ export class Dashboard implements OnInit, OnDestroy {
     if (entity) {
       return this.getClimateTargetTemp(entity);
     }
-    return 20; // Default
+    return 20; 
   }
 
   async setClimatePreference(entityId: string, event: Event) {
@@ -507,7 +502,6 @@ export class Dashboard implements OnInit, OnDestroy {
     }
   }
 
-  /** Führt die SmartHome-Automatisierung für einen erkannten Nutzer aus */
   async fuehreAutomatisierungAus(personName: string) {
     if (!this.ha.isConfigured() || !this.haConnected()) return;
 
@@ -531,7 +525,7 @@ export class Dashboard implements OnInit, OnDestroy {
         if (prefTemp !== null) {
           try {
             await this.ha.setClimateTemperature(entityId, prefTemp);
-            eingeschaltet++; // Zählt hier als "Aktion ausgeführt"
+            eingeschaltet++; 
           } catch (error) {
             console.error(`❌ Fehler beim Setzen der Wunschtemperatur für ${entityId}:`, error);
           }
@@ -555,7 +549,6 @@ export class Dashboard implements OnInit, OnDestroy {
     }
   }
 
-  /** Stoppt die SmartHome-Automatisierung für einen entfernten Nutzer, beachtet dabei andere Nutzer */
   async stoppeAutomatisierung(personName: string) {
     if (!this.ha.isConfigured() || !this.haConnected()) return;
 
@@ -592,7 +585,7 @@ export class Dashboard implements OnInit, OnDestroy {
         const baseTemp = this.ha.getBaseTemperature(entityId);
         try {
           await this.ha.setClimateTemperature(entityId, baseTemp);
-          ausgeschaltet++; // Zählt hier als "Aktion ausgeführt"
+          ausgeschaltet++; 
         } catch (error) {
           console.error(`❌ Fehler beim Setzen der Basis-Temperatur für ${entityId}:`, error);
         }
@@ -615,14 +608,12 @@ export class Dashboard implements OnInit, OnDestroy {
     }
   }
 
-  /** Toggelt ein Gerät in der Automatisierungsliste des aktuellen Users */
   toggleAutomationDevice(entityId: string) {
     const username = this.auth.getCurrentUsername();
     if (!username) return;
     this.userService.toggleAutomationDevice(username, entityId);
   }
 
-  /** Prüft ob ein Gerät in der Automatisierungsliste des aktuellen Users ist */
   isInAutomation(entityId: string): boolean {
     const username = this.auth.getCurrentUsername();
     if (!username) return false;

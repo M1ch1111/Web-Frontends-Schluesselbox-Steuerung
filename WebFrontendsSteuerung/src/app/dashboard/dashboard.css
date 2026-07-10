@@ -171,7 +171,6 @@
   border-color: rgba(37, 99, 235, 0.3);
 }
 
-
 .btn-ha {
   background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
   color: #fff;
@@ -242,7 +241,6 @@
 .ha-toggle-btn.active .ha-toggle-knob {
   transform: translateX(20px);
 }
-
 
 .ha-section-badge {
   font-size: 0.8rem;

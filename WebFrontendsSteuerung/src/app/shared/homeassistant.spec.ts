@@ -37,7 +37,7 @@ describe('HomeAssistantService', () => {
   });
 
   it('should remove trailing slash from URL', () => {
-    service.saveConfig('http://ha.local:8123///', 'token');
+    service.saveConfig('http://ha.local:8123
     expect(service.getServerUrl()).toBe('http://ha.local:8123');
   });
 

@@ -14,19 +14,15 @@ export interface UserAddedEvent {
   imports: []
 })
 export class AdminPanel {
-  /** Liste aller registrierten Nutzer – vom Dashboard übergeben */
+  
   @Input() users: UserProfile[] = [];
 
-  /** Nutzername des aktuell eingeloggten Benutzers */
   @Input() currentUsername: string = '';
 
-  /** Feedback-Meldung (Erfolg / Fehler) – vom Dashboard gesetzt */
   @Input() userMessage: string | null = null;
 
-  /** Wird ausgelöst, wenn ein neuer Nutzer angelegt werden soll */
   @Output() userAdded = new EventEmitter<UserAddedEvent>();
 
-  /** Wird ausgelöst, wenn ein Nutzer gelöscht werden soll */
   @Output() userDeleted = new EventEmitter<string>();
 
   onAdd(usernameInput: HTMLInputElement, passwordInput: HTMLInputElement): void {

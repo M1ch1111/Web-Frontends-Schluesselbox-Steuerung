@@ -1,12 +1,11 @@
 import { Injectable } from '@angular/core';
 
-/** Profil eines registrierten Nutzers */
 export interface UserProfile {
-  username: string;            // Muss dem MQTT-Namen (ESP32 RFID) entsprechen
-  password: string;            // Klartext für MVP (kein Backend)
-  isAdmin: boolean;            // Kann andere Nutzer verwalten
-  automationDevices: string[]; // entity_ids die bei Ankunft eingeschaltet werden
-  climatePreferences?: Record<string, number>; // Wunschtemperaturen pro Heizkörper
+  username: string;            
+  password: string;            
+  isAdmin: boolean;            
+  automationDevices: string[]; 
+  climatePreferences?: Record<string, number>; 
 }
 
 const STORAGE_KEY = 'schluesselbox_users';
@@ -32,17 +31,14 @@ export class UserService {
     }
   }
 
-  /** Gibt alle registrierten Nutzer zurück */
   getUsers(): UserProfile[] {
     return [...this.users];
   }
 
-  /** Findet einen Nutzer anhand des Namens */
   getUserByName(username: string): UserProfile | undefined {
     return this.users.find(u => u.username.toLowerCase() === username.toLowerCase());
   }
 
-  /** Prüft Login-Daten und gibt den User zurück wenn erfolgreich */
   authenticate(username: string, password: string): UserProfile | null {
     const user = this.users.find(
       u => u.username.toLowerCase() === username.toLowerCase() && u.password === password
@@ -50,7 +46,6 @@ export class UserService {
     return user ?? null;
   }
 
-  /** Fügt einen neuen Nutzer hinzu */
   addUser(username: string, password: string, isAdmin: boolean = false): boolean {
     if (this.getUserByName(username)) {
       return false;
@@ -67,10 +62,9 @@ export class UserService {
     return true;
   }
 
-  /** Entfernt einen Nutzer (der feste 'admin' kann nicht gelöscht werden) */
   removeUser(username: string): boolean {
     if (username.toLowerCase() === 'admin') {
-      return false; // Fester Admin-Nutzer darf nicht gelöscht werden
+      return false; 
     }
     const index = this.users.findIndex(
       u => u.username.toLowerCase() === username.toLowerCase()
@@ -82,13 +76,11 @@ export class UserService {
     return true;
   }
 
-  /** Gibt die Automatisierungs-Geräte eines Nutzers zurück */
   getAutomationDevices(username: string): string[] {
     const user = this.getUserByName(username);
     return user ? [...user.automationDevices] : [];
   }
 
-  /** Setzt die komplette Geräteliste für einen Nutzer */
   setAutomationDevices(username: string, entityIds: string[]): void {
     const user = this.getUserByName(username);
     if (user) {
@@ -97,7 +89,6 @@ export class UserService {
     }
   }
 
-  /** Toggelt ein einzelnes Gerät in der Automatisierungsliste */
   toggleAutomationDevice(username: string, entityId: string): boolean {
     const user = this.getUserByName(username);
     if (!user) return false;
@@ -109,16 +100,14 @@ export class UserService {
       user.automationDevices.splice(index, 1);
     }
     this.saveToStorage();
-    return index === -1; // true = wurde hinzugefügt, false = wurde entfernt
+    return index === -1; 
   }
 
-  /** Prüft ob ein Gerät in der Automatisierungsliste eines Nutzers ist */
   isDeviceInAutomation(username: string, entityId: string): boolean {
     const user = this.getUserByName(username);
     return user ? user.automationDevices.includes(entityId) : false;
   }
 
-  /** Prüft, ob jemand anders diese Heizung bereits in der Routine hat */
   getClimateOwner(entityId: string): string | null {
     for (const user of this.users) {
       if (user.automationDevices.includes(entityId)) {
@@ -128,14 +117,12 @@ export class UserService {
     return null;
   }
 
-  /** Gibt die Wunschtemperatur eines Nutzers für ein Gerät zurück */
   getClimatePreference(username: string, entityId: string): number | null {
     const user = this.getUserByName(username);
     if (!user || !user.climatePreferences) return null;
     return user.climatePreferences[entityId] ?? null;
   }
 
-  /** Setzt die Wunschtemperatur eines Nutzers für ein Gerät */
   setClimatePreference(username: string, entityId: string, temp: number): void {
     const user = this.getUserByName(username);
     if (user) {

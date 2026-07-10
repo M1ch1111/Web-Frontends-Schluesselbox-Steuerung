@@ -7,7 +7,6 @@ import { UserService, UserProfile } from './user';
 export class AuthService {
   private userService = inject(UserService);
 
-  /** Der aktuell eingeloggte Nutzer (null = nicht eingeloggt) */
   currentUser = signal<UserProfile | null>(null);
 
   constructor() { }
@@ -16,17 +15,14 @@ export class AuthService {
     return this.currentUser() !== null;
   }
 
-  /** Gibt den Nutzernamen des aktuell eingeloggten Users zurück */
   getCurrentUsername(): string {
     return this.currentUser()?.username ?? '';
   }
 
-  /** Prüft ob der aktuelle User Admin-Rechte hat */
   isAdmin(): boolean {
     return this.currentUser()?.isAdmin ?? false;
   }
 
-  /** Login gegen die UserService-Nutzerliste */
   async login(username: string, password: string): Promise<boolean> {
     const user = this.userService.authenticate(username, password);
 

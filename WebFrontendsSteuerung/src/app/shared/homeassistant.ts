@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 
-/** Typdefinition für eine Home Assistant Entität */
 export interface HaEntity {
   entity_id: string;
   state: string;
@@ -14,7 +13,6 @@ export interface HaEntity {
   last_updated: string;
 }
 
-/** Unterstützte Gerätedomains */
 export type HaDomain = 'light' | 'switch' | 'sensor' | 'climate' | 'input_boolean';
 
 const SUPPORTED_DOMAINS: HaDomain[] = ['light', 'switch', 'sensor', 'climate', 'input_boolean'];
@@ -50,33 +48,27 @@ export class HomeAssistantService {
     }
   }
 
-  /** Prüft ob URL und Token konfiguriert sind */
   isConfigured(): boolean {
     return this.serverUrl.length > 0 && this.accessToken.length > 0;
   }
 
-  /** Gibt die aktuelle Server-URL zurück */
   getServerUrl(): string {
     return this.serverUrl;
   }
 
-  /** Gibt den aktuellen Token zurück */
   getAccessToken(): string {
     return this.accessToken;
   }
 
-  /** Gibt den Raum-Filter zurück */
   getRoomFilter(): string {
     return this.roomFilter;
   }
 
-  /** Gibt den aktuellen Token zurück (maskiert) */
   getTokenPreview(): string {
     if (this.accessToken.length <= 8) return '****';
     return this.accessToken.substring(0, 4) + '...' + this.accessToken.substring(this.accessToken.length - 4);
   }
 
-  /** Speichert die HA-Konfiguration in localStorage */
   saveConfig(url: string, token: string, room: string = ''): void {
     this.serverUrl = url.replace(/\/+$/, '');
     this.accessToken = token.trim();
@@ -89,7 +81,6 @@ export class HomeAssistantService {
     }
   }
 
-  /** Erstellt die HTTP-Header für API-Anfragen */
   private getHeaders(): Record<string, string> {
     return {
       'Authorization': `Bearer ${this.accessToken}`,
@@ -97,7 +88,6 @@ export class HomeAssistantService {
     };
   }
 
-  /** Holt alle Entitäten von Home Assistant und filtert nach unterstützten Domains */
   async getStates(): Promise<HaEntity[]> {
     if (!this.isConfigured()) {
       throw new Error('Home Assistant ist nicht konfiguriert.');
@@ -140,7 +130,6 @@ export class HomeAssistantService {
     return this.filterSupportedEntities(allEntities);
   }
 
-  /** Ruft einen Home Assistant Service auf (z.B. light/turn_on) */
   async callService(domain: string, service: string, entityId: string): Promise<void> {
     if (!this.isConfigured()) {
       throw new Error('Home Assistant ist nicht konfiguriert.');
@@ -157,7 +146,6 @@ export class HomeAssistantService {
     }
   }
 
-  /** Ändert die Temperatur eines Thermostats */
   async setClimateTemperature(entityId: string, temperature: number): Promise<void> {
     if (!this.isConfigured()) {
       throw new Error('Home Assistant ist nicht konfiguriert.');
@@ -174,12 +162,10 @@ export class HomeAssistantService {
     }
   }
 
-  /** Gibt die Basis-Temperatur für ein Thermostat zurück (Standard: 16°C) */
   getBaseTemperature(entityId: string): number {
     return this.climateBaseTemps[entityId] ?? 16;
   }
 
-  /** Setzt die Basis-Temperatur für ein Thermostat */
   setBaseTemperature(entityId: string, temperature: number): void {
     this.climateBaseTemps[entityId] = temperature;
     if (typeof localStorage !== 'undefined') {
@@ -187,7 +173,6 @@ export class HomeAssistantService {
     }
   }
 
-  /** Schaltet ein Gerät um (toggle) – bestimmt automatisch die richtige Aktion */
   async toggleEntity(entity: HaEntity): Promise<void> {
     const domain = this.getDomain(entity.entity_id);
 
@@ -197,12 +182,10 @@ export class HomeAssistantService {
     }
   }
 
-  /** Extrahiert die Domain aus einer entity_id (z.B. "light" aus "light.wohnzimmer") */
   getDomain(entityId: string): string {
     return entityId.split('.')[0];
   }
 
-  /** Filtert Entitäten nach unterstützten Domains */
   private filterSupportedEntities(entities: HaEntity[]): HaEntity[] {
     return entities.filter(entity => {
       const domain = this.getDomain(entity.entity_id);
@@ -210,7 +193,6 @@ export class HomeAssistantService {
     });
   }
 
-  /** Gruppiert Entitäten nach Domain */
   groupByDomain(entities: HaEntity[]): Record<string, HaEntity[]> {
     const groups: Record<string, HaEntity[]> = {};
 
@@ -225,7 +207,6 @@ export class HomeAssistantService {
     return groups;
   }
 
-  /** Gibt ein passendes Emoji für eine Domain zurück */
   getDomainIcon(domain: string): string {
     switch (domain) {
       case 'light': return '💡';
@@ -237,7 +218,6 @@ export class HomeAssistantService {
     }
   }
 
-  /** Gibt einen lesbaren Domain-Namen zurück */
   getDomainLabel(domain: string): string {
     switch (domain) {
       case 'light': return 'Lichter';
