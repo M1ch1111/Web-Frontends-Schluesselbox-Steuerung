@@ -63,6 +63,12 @@
         },
         "serve": {
           "builder": "@angular/build:dev-server",
+          "options": {
+            "allowedHosts": [
+              "192.168.137.1",
+              "localhost"
+            ]
+          },
           "configurations": {
             "production": {
               "buildTarget": "WebFrontendsSteuerung:build:production"
