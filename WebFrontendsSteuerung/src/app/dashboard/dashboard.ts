@@ -8,13 +8,12 @@ import { HomeAssistantService, HaEntity } from '../shared/homeassistant';
 import { UserService } from '../shared/user';
 import { AdminPanel, UserAddedEvent } from '../admin-panel/admin-panel';
 import { MqttTopicPipe } from '../shared/mqtt-topic.pipe';
-import { SlotStatusDirective } from '../shared/slot-status.directive';
 
 @Component({
   selector: 'app-dashboard',
   templateUrl: './dashboard.html',
   styleUrls: ['./dashboard.css'],
-  imports: [UpperCasePipe, DatePipe, AdminPanel, MqttTopicPipe, SlotStatusDirective, FormsModule]
+  imports: [UpperCasePipe, DatePipe, AdminPanel, MqttTopicPipe, FormsModule]
 })
 export class Dashboard implements OnInit, OnDestroy {
   auth = inject(AuthService);
