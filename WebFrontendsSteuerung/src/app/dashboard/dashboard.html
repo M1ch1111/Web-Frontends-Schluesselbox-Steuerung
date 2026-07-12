@@ -230,35 +230,35 @@
                     <div class="d-flex align-items-center gap-3 mb-4 p-3 rounded-3"
             style="background: rgba(0,0,0,0.02); border: 1px solid rgba(0,0,0,0.05);">
             <div class="weather-icon-container">
-              @if (weatherCode() === null) {
+              @if (wetter.weatherCode() === null) {
               <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="currentColor" class="text-info"
                 viewBox="0 0 16 16">
                 <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z" />
                 <path
                   d="M5.255 5.786a.237.237 0 0 0 .241.247h.825c.138 0 .248-.113.266-.25.09-.656.54-1.134 1.342-1.134.686 0 1.314.343 1.314 1.168 0 .635-.374.927-.962 1.354-.528.381-1.182.8-1.182 1.822v.477c0 .138.112.25.25.25h.75c.138 0 .25-.112.25-.25v-.432c0-.764.39-1.077 1.018-1.564.53-.412 1.199-.877 1.199-2.003 0-1.423-1.095-2.39-2.53-2.39-1.392 0-2.478.96-2.585 2.378zm2.748 6.002a.987.987 0 1 0 0-1.974.987.987 0 0 0 0 1.974z" />
               </svg>
-              } @else if (weatherCode() === 0) {
+              } @else if (wetter.weatherCode() === 0) {
                             <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="#f59e0b" class="bi bi-sun-fill"
                 viewBox="0 0 16 16" style="filter: drop-shadow(0 0 8px rgba(245, 158, 11, 0.3));">
                 <path
                   d="M8 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM8 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 0zm0 13a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 13zm8-5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2a.5.5 0 0 1 .5.5zM3 8a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2A.5.5 0 0 1 3 8zm10.657-5.657a.5.5 0 0 1 0 .707l-1.414 1.415a.5.5 0 1 1-.707-.708l1.414-1.414a.5.5 0 0 1 .707 0zm-9.193 9.193a.5.5 0 0 1 0 .707L3.05 13.657a.5.5 0 0 1-.707-.707l1.414-1.414a.5.5 0 0 1 .707 0zm9.193 2.121a.5.5 0 0 1-.707 0l-1.414-1.414a.5.5 0 0 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .707zM4.464 4.465a.5.5 0 0 1-.707 0L2.343 3.05a.5.5 0 1 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .708z" />
               </svg>
-              } @else if (weatherCode()! >= 1 && weatherCode()! <= 3) {                 <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="#94a3b8" viewBox="0 0 16 16">
+              } @else if (wetter.weatherCode()! >= 1 && wetter.weatherCode()! <= 3) {                 <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="#94a3b8" viewBox="0 0 16 16">
                   <path d="M13.405 7.027a5.001 5.001 0 0 0-9.499-1.004A3.5 3.5 0 1 0 3.5 13H13a3 3 0 0 0 .405-5.973z" />
                 </svg>
-                } @else if (weatherCode()! >= 45 && weatherCode()! <= 48) {                   <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="#cbd5e1" viewBox="0 0 16 16">
+                } @else if (wetter.weatherCode()! >= 45 && wetter.weatherCode()! <= 48) {                   <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="#cbd5e1" viewBox="0 0 16 16">
                     <path
                       d="M13.405 7.027a5.001 5.001 0 0 0-9.499-1.004A3.5 3.5 0 1 0 3.5 13H13a3 3 0 0 0 .405-5.973zM2.5 15a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5z" />
                   </svg>
-                  } @else if (weatherCode()! >= 51 && weatherCode()! <= 67) {                     <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="#38bdf8" viewBox="0 0 16 16">
+                  } @else if (wetter.weatherCode()! >= 51 && wetter.weatherCode()! <= 67) {                     <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="#38bdf8" viewBox="0 0 16 16">
                       <path
                         d="M4.158 12.025a.5.5 0 0 1 .316.633l-.5 1.5a.5.5 0 0 1-.948-.316l.5-1.5a.5.5 0 0 1 .632-.317zm3 0a.5.5 0 0 1 .316.633l-1 3a.5.5 0 0 1-.948-.316l1-3a.5.5 0 0 1 .632-.317zm3 0a.5.5 0 0 1 .316.633l-.5 1.5a.5.5 0 0 1-.948-.316l.5-1.5a.5.5 0 0 1 .632-.317zm3 0a.5.5 0 0 1 .316.633l-1 3a.5.5 0 0 1-.948-.316l1-3a.5.5 0 0 1 .632-.317zM13.405 7.027a5.001 5.001 0 0 0-9.499-1.004A3.5 3.5 0 1 0 3.5 13H13a3 3 0 0 0 .405-5.973z" />
                     </svg>
-                    } @else if (weatherCode()! >= 71 && weatherCode()! <= 77) {                       <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="#e2e8f0" viewBox="0 0 16 16">
+                    } @else if (wetter.weatherCode()! >= 71 && wetter.weatherCode()! <= 77) {                       <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="#e2e8f0" viewBox="0 0 16 16">
                         <path
                           d="M8 16a.5.5 0 0 1-.5-.5v-1.293l-.646.647a.5.5 0 0 1-.707-.708L7.5 12.793V8.866l-3.4 1.963.5 2.5a.5.5 0 0 1-.98.196l-.378-1.89-1.3 1.3a.5.5 0 0 1-.707-.707l1.3-1.3-1.89-.379a.5.5 0 0 1 .196-.98l2.5.5 3.4-1.963v-3.2l-3.4 1.962.5 2.501a.5.5 0 0 1-.98.196l-.378-1.89-1.3 1.3a.5.5 0 0 1-.707-.707l1.3-1.3-1.89-.379a.5.5 0 0 1 .196-.98l2.5.5 3.4-1.963V5.5a.5.5 0 0 1 1 0v1.293l.646-.647a.5.5 0 0 1 .707.708L8.5 8.207v3.927l3.4-1.963-.5-2.5a.5.5 0 1 1 .98-.196l.378 1.89 1.3-1.3a.5.5 0 0 1 .707.707l-1.3 1.3 1.89.379a.5.5 0 0 1-.196.98l-2.5-.5-3.4 1.963v3.2l3.4-1.962-.5-2.501a.5.5 0 1 1 .98-.196l.378 1.89 1.3-1.3a.5.5 0 0 1 .707.707l-1.3 1.3 1.89.379a.5.5 0 0 1-.196.98l-2.5-.5-3.4 1.963V15.5a.5.5 0 0 1-.5.5z" />
                       </svg>
-                      } @else if (weatherCode()! >= 95) {
+                      } @else if (wetter.weatherCode()! >= 95) {
                                             <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="#3b82f6" viewBox="0 0 16 16"
                         style="filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.2));">
                         <path
@@ -270,11 +270,11 @@
             </div>
             <div>
               <div class="text-muted small">Aktueller Wetterstatus</div>
-              <h5 class="mb-0 fw-bold">{{ wetterInfo() }}</h5>
+              <h5 class="mb-0 fw-bold">{{ wetter.wetterInfo() }}</h5>
             </div>
           </div>
 
-          <button class="btn btn-cyan w-100 mb-3 shadow-sm fw-bold py-2.5" (click)="ladeLiveWetter()">
+          <button class="btn btn-cyan w-100 mb-3 shadow-sm fw-bold py-2.5" (click)="wetter.ladeLiveWetter()">
             Live-Daten abrufen & senden
           </button>
 
@@ -287,13 +287,13 @@
             Müllabfuhr
           </h5>
 
-          <button class="btn btn-emerald w-100 mb-4 shadow-sm fw-bold py-2.5" (click)="ermittleLiveMuell()">
+          <button class="btn btn-emerald w-100 mb-4 shadow-sm fw-bold py-2.5" (click)="muell.ermittleLiveMuell()">
             Kalender prüfen & senden
           </button>
 
                     <h6 class="text-muted fw-bold mb-2 font-monospace" style="font-size: 0.75rem;">KOMMENDE ABHOLUNGEN:</h6>
 
-          @if (upcomingMuell().length === 0) {
+          @if (muell.upcomingMuell().length === 0) {
           <div class="alert alert-light border text-center py-2 text-muted small mb-0"
             style="background: rgba(0,0,0,0.01); border-color: rgba(0,0,0,0.05) !important;">
             Keine Termine in den nächsten 7 Tagen.
@@ -301,7 +301,7 @@
           } @else {
           <ul class="list-group list-group-flush border rounded-3 bg-transparent"
             style="border-color: rgba(0,0,0,0.08) !important;">
-            @for (muell of upcomingMuell(); track $index) {
+            @for (muell of muell.upcomingMuell(); track $index) {
             <li class="list-group-item bg-transparent py-2.5 d-flex justify-content-between align-items-center"
               [class.trash-today-warning]="muell.istHeute" [style.border-bottom]="'1px solid rgba(0,0,0,0.04)'"
               [style.color]="muell.istHeute ? 'var(--accent-rose)' : 'var(--text-main)'">

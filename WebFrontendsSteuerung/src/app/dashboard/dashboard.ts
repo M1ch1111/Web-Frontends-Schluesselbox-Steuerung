@@ -6,6 +6,8 @@ import { AuthService } from '../shared/auth';
 import { MqttService } from '../shared/mqtt';
 import { HomeAssistantService, HaEntity } from '../shared/homeassistant';
 import { UserService } from '../shared/user';
+import { WetterService } from '../shared/wetter';
+import { MuellService } from '../shared/muell';
 import { AdminPanel, UserAddedEvent } from '../admin-panel/admin-panel';
 import { MqttTopicPipe } from '../shared/mqtt-topic.pipe';
 
@@ -21,6 +23,8 @@ export class Dashboard implements OnInit, OnDestroy {
   private mqtt = inject(MqttService);
   ha = inject(HomeAssistantService);
   userService = inject(UserService);
+  wetter = inject(WetterService);
+  muell = inject(MuellService);
 
   private heartbeatInterval: any;
   private timeoutTimer: any;
@@ -31,14 +35,11 @@ export class Dashboard implements OnInit, OnDestroy {
   schluesselPlaetze = signal<string[]>(['leer', 'leer', 'leer']);
 
   mqttLogs = signal<{ zeit: Date; topic: string; message: string }[]>([]);
-  upcomingMuell = signal<{ datumStr: string; art: string; istHeute: boolean }[]>([]);
 
   mqttIp = signal('Rasp5Uni.local');
   mqttUser = signal('admin');
   mqttPass = signal('admin');
   settingsOpen = signal(false);
-  wetterInfo = signal('Keine Daten (Bitte laden)');
-  weatherCode = signal<number | null>(null);
   haEntities = signal<HaEntity[]>([]);
   haGrouped = computed(() => this.ha.groupByDomain(this.haEntities()));
   haConnected = signal(false);
@@ -75,8 +76,8 @@ export class Dashboard implements OnInit, OnDestroy {
     setTimeout(() => {
       this.frageStatusAb();
       this.startHeartbeat();
-      this.ermittleLiveMuell();
-      this.ladeLiveWetter();
+      this.muell.ermittleLiveMuell();
+      this.wetter.ladeLiveWetter();
     }, 1500);
     if (this.ha.isConfigured()) {
       this.ladeSmartHomeGeraete();
@@ -184,146 +185,7 @@ export class Dashboard implements OnInit, OnDestroy {
     return nummer - 1;
   }
 
-  sendeWetter(wetter: string) {
-    this.mqtt.publish('schluesselbox/wetter', wetter);
-  }
 
-  sendeMuell(muellArt: string) {
-    this.mqtt.publish('schluesselbox/muell', muellArt);
-  }
-
-  async ladeLiveWetter() {
-    try {
-      const url = 'https://api.open-meteo.com/v1/forecast?latitude=51.5719&longitude=8.1094&current=temperature_2m,weather_code';
-      const response = await fetch(url);
-      const data = await response.json();
-      const temp = Math.round(data.current.temperature_2m);
-      const code = data.current.weather_code;
-
-      let wetterText = 'Unbekannt';
-      if (code === 0) wetterText = 'Sonnig';
-      else if (code === 1 || code === 2 || code === 3) wetterText = 'Bewoelkt';
-      else if (code >= 45 && code <= 48) wetterText = 'Nebel';
-      else if (code >= 51 && code <= 67) wetterText = 'Regen';
-      else if (code >= 71 && code <= 77) wetterText = 'Schnee';
-      else if (code >= 95) wetterText = 'Gewitter';
-
-      this.wetterInfo.set(`${wetterText} ${temp}°C`);
-      this.weatherCode.set(code);
-      this.sendeWetter(`${wetterText} ${temp}C`);
-    } catch (error) {
-      console.error('Fehler beim Wetter-Abruf', error);
-      this.wetterInfo.set('Fehler beim Laden');
-    }
-  }
-
-  async ermittleLiveMuell() {
-    try {
-      const filePath = '/muell_merowingerweg.ics';
-      const response = await fetch(filePath);
-
-      if (!response.ok) {
-        console.error(`❌ Datei nicht gefunden: ${filePath} (HTTP Status: ${response.status})`);
-        return;
-      }
-
-      const text = await response.text();
-
-      if (!text.includes('BEGIN:VEVENT')) {
-        console.error('❌ Die geladene Datei ist keine gültige ICS-Datei. Inhalt:', text.substring(0, 100));
-        return;
-      }
-
-      console.log(`✅ Kalender erfolgreich geladen von: ${filePath}`);
-      const icsData = text;
-
-      const heute = new Date();
-      heute.setHours(0, 0, 0, 0);
-
-      const in7Tagen = new Date(heute);
-      in7Tagen.setDate(heute.getDate() + 7);
-      in7Tagen.setHours(23, 59, 59, 999);
-
-      const heuteStr = heute.getFullYear().toString() +
-        (heute.getMonth() + 1).toString().padStart(2, '0') +
-        heute.getDate().toString().padStart(2, '0');
-
-      let heutigerMuell = 'Kein Muell';
-      let tempList: { date: Date; datumStr: string; art: string; istHeute: boolean }[] = [];
-
-      const lines = icsData.split(/\r?\n/);
-      let inEvent = false;
-      let eventDate = '';
-      let eventSummary = '';
-
-      for (let i = 0; i < lines.length; i++) {
-        const line = lines[i].trim();
-
-        if (line === 'BEGIN:VEVENT') {
-          inEvent = true;
-          eventDate = '';
-          eventSummary = '';
-        } else if (line === 'END:VEVENT') {
-          inEvent = false;
-
-          if (eventDate && eventSummary) {
-            eventSummary = eventSummary
-              .replace(" 14-taeglich", "")
-              .replace(" 4-woechentl.", "")
-              .replace(" 14 mal taeglich", "")
-              .trim();
-
-            const year = parseInt(eventDate.substring(0, 4), 10);
-            const month = parseInt(eventDate.substring(4, 6), 10) - 1;
-            const day = parseInt(eventDate.substring(6, 8), 10);
-            const eDate = new Date(year, month, day);
-
-            if (eDate >= heute && eDate <= in7Tagen) {
-              const isHeute = eventDate === heuteStr || eventDate.startsWith(heuteStr);
-              if (isHeute) {
-                heutigerMuell = eventSummary;
-              }
-
-              const wochentage = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
-              const wochentag = wochentage[eDate.getDay()];
-              const artMitWochentag = `${eventSummary} (${wochentag})`;
-
-              const datumFormatiert = `${day.toString().padStart(2, '0')}.${(month + 1).toString().padStart(2, '0')}.${year}`;
-              const existiertSchon = tempList.find(t => t.datumStr === datumFormatiert && t.art === artMitWochentag);
-
-              if (!existiertSchon) {
-                tempList.push({
-                  date: eDate,
-                  datumStr: datumFormatiert,
-                  art: artMitWochentag,
-                  istHeute: isHeute
-                });
-              }
-            }
-          }
-        } else if (inEvent) {
-          if (line.startsWith('DTSTART')) {
-            const index = line.indexOf(':');
-            if (index > -1) eventDate = line.substring(index + 1, index + 9);
-          } else if (line.startsWith('SUMMARY')) {
-            const index = line.indexOf(':');
-            if (index > -1) {
-              eventSummary = line.substring(index + 1).trim();
-              eventSummary = eventSummary.replace(/ü/g, 'ue').replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/Ü/g, 'Ue').replace(/Ä/g, 'Ae').replace(/Ö/g, 'Oe');
-            }
-          }
-        }
-      }
-
-      tempList.sort((a, b) => a.date.getTime() - b.date.getTime());
-      this.upcomingMuell.set(tempList);
-
-      console.log('Müll für HEUTE ermittelt:', heutigerMuell);
-      this.sendeMuell(heutigerMuell);
-    } catch (error) {
-      console.error('Fehler beim Verarbeiten des Müllkalenders:', error);
-    }
-  }
 
   async logout() {
     await this.auth.logout();
